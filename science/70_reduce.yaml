@@ -1,0 +1,139 @@
+reduce:
+  jobkey: reduced
+  inputs:
+  - path: ./data
+  steps:
+  - name: citlali
+    # version: '~=1.2'
+    config:
+      cal_items:
+      - type: photometry
+        beammap_source:
+          name: S1
+          ra_deg: 180.
+          dec_deg: 0.
+          fluxes:
+          - array_name: a1100
+            value_mJy: 2000.
+            uncertainty_mJy: 0.05
+          - array_name: a1400
+            value_mJy: 2000.
+            uncertainty_mJy: 0.05
+          - array_name: a2000
+            value_mJy: 2000.
+            uncertainty_mJy: 0.05
+        extinction:
+          model_name: "some_model"
+          tau_220: 0.3
+      - type: astrometry
+        pointing_offsets:
+        - axes_name: az
+          value_arcsec: 0
+        - axes_name: alt
+          value_arcsec: 0
+      low_level:
+        kids:
+          fitter:
+            modelspec: gainlintrend
+            weight_window:
+              fwhm_Hz: 1.5e4
+              type: lorentz
+          solver:
+              fitreportdir: /data/data_lmt/toltec/reduced
+        runtime:
+          parallel_policy: omp # seq, omp, tbb
+          n_threads: 8 # number of threads to parallelize over
+          use_subdir: true #make a unique sub directory for each run
+          reduction_type: science #beammap, poiniting, etc
+          meta:
+            version: tolteca...
+            #high level config settings
+        interface_sync_offset: #dict for each toltec[0..12]+hwp+lmt/  #match keys with file interface key
+          - toltec0: 0
+          - toltec1: 0
+          - toltec2: 0
+          - toltec3: 0
+          - toltec4: 0
+          - toltec5: 0
+          - toltec6: 0
+          - toltec7: 0
+          - toltec8: 0
+          - toltec9: 0
+          - toltec10: 0
+          - toltec11: 0
+          - toltec12: 0
+          - hwp: 0
+        timestream:
+          polarimetry:
+            enabled: false
+          output:
+            enabled: false
+            format: netcdf
+            chunk_type: rtc #ptc
+          chunking:
+            length_sec: 10.0
+          weighting:
+            type: approximate #approximate
+          despike:
+            enabled: false
+            min_spike_sigma: 8.0
+            time_constant_sec: 0.015
+            window_size: 32
+          filter:
+            enabled: false
+            a_gibbs: 50.0
+            freq_high_Hz: 16.0
+            freq_low_Hz: 0.0
+            n_terms: 32
+          downsample:
+            enabled: true
+            factor: 1
+          kernel:
+            enabled: true
+            filepath: null
+            image_ext_name: signal
+            type: internal_gaussian #image, internal_airy
+          clean:
+            enabled: true
+            cut_std: 0.0
+            grouping: array_name
+            n_eig_to_cut: 3
+        mapmaking:
+          enabled: true
+          cunit: "MJy/Sr" # mJy/beam
+          crpix1: 0
+          crpix2: 0
+          crval1_J2000: 0
+          crval2_J2000: 0
+          grouping: array_name
+          method: naive
+          pixel_axes: icrs
+          pixel_size_arcsec: 1.0
+          x_size_pix: 0
+          y_size_pix: 0
+        beammap:
+          iter_tolerance: 0.05
+          iter_max: 5
+        source_fitting:
+          enabled: false
+          model: gaussian
+          bounding_box_arcsec: 10
+          initial_guess: brightest_pixel #table
+        coadd:
+          enabled: false
+          cov_cut: 0.75
+          noise_maps:
+            enabled: false
+            n_noise_maps: 30
+          filtering:
+            enabled: true
+            type: wiener_filter
+        wiener_filter:
+          gaussian_template: true
+          gaussian_template_fwhm_arcsec:
+            a1100: 5
+            a1400: 6.3
+            a2000: 9.5
+          lowpass_only: false
+          highpass_only: false
+          normalize_error: false
