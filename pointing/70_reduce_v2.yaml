@@ -1,0 +1,169 @@
+reduce:
+  jobkey: reduced
+  inputs:
+  - path: ./data
+  steps:
+  - name: citlali
+    # version: '~=1.2'
+    config:
+      cal_items:
+      - type: photometry
+        beammap_source:
+          name: S1
+          ra_deg: 180.
+          dec_deg: 0.
+          fluxes:
+          - array_name: a1100
+            value_mJy: 2000.
+            uncertainty_mJy: 0.05
+          - array_name: a1400
+            value_mJy: 2000.
+            uncertainty_mJy: 0.05
+          - array_name: a2000
+            value_mJy: 2000.
+            uncertainty_mJy: 0.05
+        extinction:
+          model_name: "some_model"
+          tau_220: 0.3
+      - type: astrometry
+        pointing_offsets:
+        - axes_name: az
+          value_arcsec: 0
+        - axes_name: alt
+          value_arcsec: 0
+      low_level:
+        interface_sync_offset: # manual timing offsets for each nw/hwp (in seconds)
+          - toltec0: 0
+          - toltec1: 0
+          - toltec2: 0
+          - toltec3: 0
+          - toltec4: 0
+          - toltec5: 0
+          - toltec6: 0
+          - toltec7: 0
+          - toltec8: 0
+          - toltec9: 0
+          - toltec10: 0
+          - toltec11: 0
+          - toltec12: 0
+          - hwp: 0
+        kids: # kids fitting parameters
+          fitter:
+            modelspec: gainlintrend
+            weight_window:
+              fwhm_Hz: 1.5e4
+              type: lorentz
+          solver:
+            fitreportdir: /path/to/fitreportdir/directory/
+        mapmaking: # mapmaking parameters
+          histogram:
+            n_bins: 20 # number of histogram bins (>0)
+          enabled: true # enable or disable mapmaking (for TOD processing only)
+          crpix1: 0 # ref pixel 1 (ignored if 0)
+          crpix2: 0 # ref pixel 2 (ignored if 0)
+          crval1_J2000: 0 # ref value 1 (ignored if 0)
+          crval2_J2000: 0 # ref value 1 (ignored if 0)
+          cunit: MJy/sr # units (MJy/sr or mJy/beam)
+          grouping: auto # mapmaking grouping (detector,nw, array.  use auto for now)
+          method: naive # mapmaking algorithm (naive or jinc)
+          pixel_axes: altaz # reference frame (icrs or altaz)
+          pixel_size_arcsec: 1.0 # pixel size in arceconds
+          x_size_pix: 0 # manually specify map columns
+          y_size_pix: 0 # manually specify map rows
+        runtime: # parameters to control how citlali runs
+          verbose: true # extra output in terminal.  adds files to obsnum/logs/ directory.
+          meta:
+            version: tolteca... # extra info from tolteca
+          n_threads: 8 # number of threads to use
+          #output_dir: /path/to/redu/directory/ # path to output directory
+          parallel_policy: omp # parallelization policy (seq=sequential, omp=OMP parallelization)
+          reduction_type: pointing # reduction engine (science, pointing, beammap)
+          use_subdir: true # create "redu00, redu01,..." sub-directories.  increments automatically.
+        source_fitting: # parameters for source fitting
+          bounding_box_arcsec: 10 # size of box in arcseconds around initial position
+          enabled: false # enable or disable fitting (ignored for now)
+          initial_guess: brightest_pixel # initial position (ignored for now)
+          model: gaussian # model type (ignored for now)
+        timestream: # timestream reduction parameters
+          type: xs # type of TOD (xs or rs)
+          enabled: true # enable or disable TOD processing (to be implemented)
+          chunking: # how to chunk timestreams
+            length_sec: 10.0 # chunk length for lissajous/rastajous maps (ignored if raster map)
+          clean: # remove (hopefully) the atmospheric signal
+            cut_std: 0.0 # standard deviation cut for cleaning (only used if >0)
+            enabled: true # enable or disable cleaning
+            grouping: array # clean grouping (array or nw)
+            n_eig_to_cut: 3 # number of eigenvalues to remove (ignored if cut_std >0)
+          despike: # remove cosmic ray spikes
+            enabled: false # enable or disable despiking
+            min_spike_sigma: 8.0 # minimum spike sigma value (n x sigma of TOD)
+            time_constant_sec: 0.015 # spike decay time
+            window_size: 32 # number of samples to flag on either side of spike (ignored if TOD filtering)
+          downsample: # downsample the data
+            enabled: false # enable or disable downsampling
+            factor: 2 # downsample factor (integer only)
+          filter: # tod filtering
+            a_gibbs: 50.0 # Kaiser-Bessel filter shape param
+            enabled: true # enable or disable tod filtering
+            freq_high_Hz: 16.0 # upper freq limit
+            freq_low_Hz: 0.5 # lower freq limit
+            n_terms: 32 # size of filter in samples
+          kernel: # make synthetic timestreams for reduction characterization
+            enabled: true # enable or disable kernel generation
+            filepath: null # filepath to FITS file with kernel
+            fwhm_arcsec: 0
+            image_ext_name: signal # extention name if FITS file
+            type: gaussian # how to make kernel (gaussian, airy, fits)
+          output: # controls options for writing out TOD as netCDF file
+            chunk_type: rtc # type of chunks to output (rtc or ptc)
+            enabled: false # enable or disable TOD output
+          calibration: # flux calibration
+            enabled: false # enable or disable flux calibration (ignored for beammapping)
+            extinction_model: am_q25 # model to use for tau calculation (am_q25, am_q50, am_q75)
+          polarimetry: # polarized reduction
+            enabled: false # enable or disable polarized reduction
+          weighting: # how to weight data and maps
+            type: approximate # type of TOD weighting (full=use scan varaince/approximate=use det sensitivity)
+            lower_std_factor: 0.0 # flag detectors below this stddev limit (ignored if 0)
+            upper_std_factor: 0.0 # flag detectors above this stddev limit (ignored if 0)
+        wiener_filter: # controls for wiener filter
+          gaussian_template: true # use gaussian template instead of kernel template
+          gaussian_template_fwhm_arcsec: # set fwhms for gaussian template
+            a1100: 5
+            a1400: 6.3
+            a2000: 9.5
+          highpass_only: false # apply highpassing only
+          lowpass_only: false # apply lowpassing only
+          normalize_error: false # correct weight map errors based on noise maps
+        beammap: # beammap controls (ignored if not beammapping)
+          iter_max: 1 # maximum number of iterations for beammapping
+          derotate: false # derotate beammap to zero elevation
+          reference_det: -99 # reference detector offset for APT positions (<0 is ignored)
+          iter_tolerance: 0.0 # tolerance for iterations
+          sens_psd_lower_limit: 0 # lower limit for psd in sensitivity calculation
+          sens_psd_upper_limit: 0 # upper limit for psd in sensitivity calculation
+          lower_fwhm_arcsec: # lower limits for fitted fwhm values
+            a1100: 0
+            a1400: 0
+            a2000: 0
+          upper_fwhm_arcsec: # upper limits for fitted fwhm values
+            a1100: 99
+            a1400: 99
+            a2000: 99
+          lower_sig2noise: # lower limits for fitted S/N values
+            a1100: 0
+            a1400: 0
+            a2000: 0
+          max_dist_arcsec: # maximum allowed distance from mean of all positions (ignored if 0)
+            a1100: 0
+            a1400: 0
+            a2000: 0
+        coadd: # coaddition controls
+          cov_cut: 0.9 # coverage cut value for psd, hist, and coverage_bool maps
+          enabled: false # enable or disable coaddition
+        map_filtering: # map filtering
+          enabled: false # enable or disable map filtering
+          type: wiener_filter # type of filter (currently ignored)
+        noise_maps: # noise map controls
+          enabled: false # enable or disable coaddition
+          n_noise_maps: 1 # number of noise maps (>0)
