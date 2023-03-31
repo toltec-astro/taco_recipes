@@ -19,17 +19,17 @@ import sys
 import json
 
 if __name__ == '__main__':
+
+    plt.ioff()
     
     # param names in pointing ecsv table
-    params = ['amp','x_t','y_t','a_fwhm','b_fwhm','angle']
-    params_units = ['mJy/beam','arcsec','arcsec','arcsec','arcsec','rad']
+    #params = ['amp','x_t','y_t','a_fwhm','b_fwhm','angle']
+    #params_units = ['MJy/Sr','arcsec','arcsec','arcsec','arcsec','rad']
     
     #parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_path', '-p', 
                         help='path to input directory')
-    parser.add_argument('--show_plot', help='show plot',
-                        action='store_true')
     parser.add_argument('--save_to_file', '-s', help='save output to file', 
                         action='store_true')
     parser.add_argument('--output_path', '-o', help='path to output directory')
@@ -40,14 +40,18 @@ if __name__ == '__main__':
     parser.add_argument('--center', '-c', help='center (crpix, fit, ' 
                         'peak of S/N map)', 
                         default='crpix')
+    parser.add_argument('--full_map', '-f', help='plot full map', 
+                        action='store_true')
     
     args = parser.parse_args()
     print(args)
     # get path to input directory
     input_path = str(args.input_path)
+
+    full_map = args.full_map
         
     # get pointing ecsv file
-    try:
+    '''try:
         if args.obsnum == 'none':
             ecsv_file = glob.glob(input_path+'/ppt*pointing*.ecsv')[0]
         else:
@@ -57,12 +61,13 @@ if __name__ == '__main__':
     except:
         print('no pointing ecsv file found')
         sys.exit()
+    '''
     
-    # get list of pointing FITS files
+    # get list of science FITS files
     if args.obsnum == 'none':
-        fits_files = np.sort(glob.glob(input_path+'/toltec*pointing*.fits'))
+        fits_files = np.sort(glob.glob(input_path+'/toltec*science.fits'))
     else:
-        fits_files = np.sort(glob.glob(input_path+'/toltec*pointing*'+args.obsnum.zfill(6)+'.fits'))
+        fits_files = np.sort(glob.glob(input_path+'/toltec*science*'+args.obsnum.zfill(6)+'.fits'))
 
     # check if there are any FITS files
     if fits_files.size == 0:
@@ -70,13 +75,14 @@ if __name__ == '__main__':
         sys.exit()
         
     # dictionary for pointing parameters, errors, and units
-    ppt_dict = {
+    '''ppt_dict = {
         'amp': {},
         'x_t': {},
         'y_t': {},
         'a_fwhm': {},
         'b_fwhm': {},
         'angle': {}}
+    '''
         
     # loop through input FITS files
     for i in range(len(fits_files)):
@@ -92,7 +98,7 @@ if __name__ == '__main__':
             sys.exit()
         
         # populate parameter dictionary
-        for j in range(len(params)):
+        '''for j in range(len(params)):
             key = params[j]
             unit = params_units[j]
             ppt_dict[key] = {
@@ -105,20 +111,31 @@ if __name__ == '__main__':
         print(array)
         print(ppt_dict)
         print('\n')
+        '''
         
-        # choose number of rows for image
-        nrows = len(args.images)
+        
         
         # get current FITS file
         img = fits.open(fits_files[i])
+
+        exts = [i for i in args.images if i in img]
+        # choose number of rows for image
+        nrows = len(exts)
+
         # make WCS object
         wcs = WCS(img[1].header).sub(2)
         
         pix_scale_arcsec = abs(wcs.wcs.cdelt[0])
         crpix1, crpix2 = wcs.wcs.crpix
-        n1,n2,n3,n4 = img[1].data.shape
-        zoom_size_arcsec = 100#min(n3,n4)
-        zoom_size_pix = np.floor(zoom_size_arcsec/pix_scale_arcsec)
+        # plot the full map
+        if full_map:
+            n0,n1,n2,n3 = img[1].data.shape
+            # get minimum of rows and cols
+            zoom_size_pix = min(n2,n3)
+        # else cutout of 100 pixels on a side
+        else:
+            zoom_size_arcsec = 100.0
+            zoom_size_pix = np.floor(zoom_size_arcsec/pix_scale_arcsec)
         
         # image plotting
         #cutout = Cutout2D(img[1].data[0,0,:,:], (crpix1, crpix2), 
@@ -144,6 +161,7 @@ if __name__ == '__main__':
                                 (cx,cy),(zoom_size_pix, zoom_size_pix), wcs=wcs)
             center_x = cx
             center_y = cy
+        '''
         elif args.center == 'peak':
             # get position of peak
             y,x = np.where(img[img.index_of('sig2noise_I')].data[0,0,:,:] == np.max(img[img.index_of('sig2noise_I')].data[0,0,:,:]))
@@ -151,9 +169,10 @@ if __name__ == '__main__':
                                 (zoom_size_pix, zoom_size_pix), wcs=wcs)
             center_x = x
             center_y = y
+        '''
         
         # create figure with wcs projection
-        fig, ax = plt.subplots(nrows=nrows, ncols=1, 
+        fig, ax = plt.subplots(nrows=1, ncols=nrows, 
                                figsize=(10*nrows, 10*nrows), 
                                subplot_kw={'projection': cutout.wcs})
         
@@ -167,35 +186,22 @@ if __name__ == '__main__':
             source_name = img[0].header['SOURCE']
         except:
             source_name = 'N/A'
-        
-        # get m2 positions
-        try:
-            m2x = img[0].header['HEADER.M2.XREQ ']
-            m2y = img[0].header['HEADER.M2.YREQ ']
-            m2z = img[0].header['HEADER.M2.ZREQ ']
-        except:
-            m2x = ''
-            m2y = ''
-            m2z = ''
-        try:
-            m1zcoeff = img[0].header['HEADER.M1.ZERNIKEC']
-        except:
-            m1zcoeff = ''
             
-        for ci in range(len(args.images)):
-            if len(args.images) == 1:
+        for ci in range(len(exts)):
+            if len(exts) == 1:
                 axi = ax
             else:
                 axi = ax[ci]
                 
             # image plotting
             if args.center == 'crpix':
-                cutout = Cutout2D(img[img.index_of(args.images[ci])].data[0,0,:,:], 
+                cutout = Cutout2D(img[img.index_of(exts[ci])].data[0,0,:,:], 
                                    (crpix1, crpix2), (zoom_size_pix, zoom_size_pix),
                                    wcs=wcs)
 
                 center_x = crpix1
                 center_y = crpix2
+            '''
             elif args.center == 'fit':
                 # get pixel coordinates of fitted positions
                 cx,cy = wcs.all_world2pix(float(ppt_dict["x_t"]["value"]), 
@@ -207,10 +213,11 @@ if __name__ == '__main__':
                                   (cx,cy),(zoom_size_pix, zoom_size_pix), wcs=wcs)
                 center_x = cx
                 center_y = cy
-            elif args.center == 'peak':
+            '''
+            if args.center == 'peak':
                 # get position of peak
                 y,x = np.where(img[img.index_of('sig2noise_I')].data[0,0,:,:] == np.max(img[img.index_of('sig2noise_I')].data[0,0,:,:]))
-                cutout = Cutout2D(img[img.index_of(args.images[ci])].data[0,0,:,:], (x, y), 
+                cutout = Cutout2D(img[img.index_of(exts[ci])].data[0,0,:,:], (x, y), 
                                   (zoom_size_pix, zoom_size_pix), wcs=wcs)
                 
                 print(x,y)
@@ -218,12 +225,13 @@ if __name__ == '__main__':
                 center_y = y
             
             # get pixel coordinates of fitted positions
-            cx,cy = cutout.wcs.all_world2pix(float(ppt_dict["x_t"]["value"]), 
+            '''cx,cy = cutout.wcs.all_world2pix(float(ppt_dict["x_t"]["value"]), 
                                      float(ppt_dict["y_t"]["value"]),0)
             
             # get pixel coordinates of fitted positions
             x,y = wcs.all_world2pix(float(ppt_dict["x_t"]["value"]), 
                                      float(ppt_dict["y_t"]["value"]),0)
+            '''
             
             #im = axi.imshow(img[img.index_of(args.images[ci])].data)
             im = axi.imshow(cutout.data)
@@ -244,7 +252,7 @@ if __name__ == '__main__':
             ax_in.spines['right'].set_color('red')
             ax_in.spines['left'].set_color('red')  
             
-            im2 = ax_in.imshow(img[img.index_of(args.images[ci])].data[0,0,:,:],
+            im2 = ax_in.imshow(img[img.index_of(exts[ci])].data[0,0,:,:],
                                origin='lower')
             
             im2 = ax_in.imshow(img[img.index_of('weight_I')].data[0,0,:,:],
@@ -255,15 +263,9 @@ if __name__ == '__main__':
             
 
             axi.grid(color='black', ls='--', alpha=0.25)
-            #axi.set_title('%s -- %s -- %s -- %s' % (source_name, obsnum, 
-            #                                        array,args.images[ci]),
-            #              fontsize=10)
-
-            axi.set_title('%s -- %s -- %s -- %s -- M2=(%.2f, %.2f, %.2f) -- M1 Zernike=%.1f' % (source_name, obsnum, 
-                                        array,args.images[ci], m2x, m2y, m2z, m1zcoeff), 
-                                        fontsize=10)
-
-
+            axi.set_title('%s -- %s -- %s -- %s' % (source_name, obsnum, 
+                                                    array,exts[ci]),
+                          fontsize=10)
             #axi.axvline(center_y,c='w',linestyle='--')
             #axi.axhline(center_x,c='w',linestyle='--')
             
@@ -275,7 +277,8 @@ if __name__ == '__main__':
             
             lon.set_axislabel('Azimuth (arcsec)')
             lat.set_axislabel('Elevation (arcsec)')
-                        
+                 
+            '''      
             # add parameters to image
             textstr = ''
             for j in range(len(params)):
@@ -291,11 +294,13 @@ if __name__ == '__main__':
                                                           units))
                 if j != len(params)-1:
                     textstr = textstr + '\n'
+                
             
             # place a text box in upper left in axes coords
             props = dict(boxstyle='round', facecolor='gray', alpha=0.75)
-            axi.text(0.25, 0.25, textstr, transform=axi.transAxes, fontsize=18,
+            axi.text(0.25, 0.25, textstr, transform=axi.transAxes, fontsize=15,
                 verticalalignment='top', bbox=props, c='yellow')
+            '''
             
             # setup colorbar
             divider = make_axes_locatable(axi)
@@ -303,19 +308,18 @@ if __name__ == '__main__':
                                       axes_class=maxes.Axes)
             
             # add colorbar
-            fig.colorbar(im, cax=cax, label=img[img.index_of(args.images[ci])].header['UNIT'], 
+            fig.colorbar(im, cax=cax, label=img[img.index_of(exts[ci])].header['UNIT'], 
                          orientation='vertical')
         
         # check if saving is requested
         if args.save_to_file:
             if args.output_path is not None:
-                fig.savefig(args.output_path + '/toltec_' + array + '_pointing_' + obsnum + '_image.png', 
+                fig.savefig(args.output_path + '/toltec_' + array + '_science_' + obsnum + '_image.png', 
                             bbox_inches='tight')
         
-                with open(args.output_path + '/toltec_' + array + '_pointing_' + obsnum + '_params.txt', 'w') as convert_file:
-                    convert_file.write(json.dumps(ppt_dict))
+                #with open(args.output_path + '/toltec_' + array + '_pointing_' + obsnum + '_params.txt', 'w') as convert_file:
+                    #convert_file.write(json.dumps(ppt_dict))
             else:
                 print('no save file output path specified')
                 sys.exit()
-        if args.show_plot:
-            plt.show()
+        #plt.show()

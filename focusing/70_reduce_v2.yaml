@@ -54,7 +54,7 @@ reduce:
               fwhm_Hz: 1.5e4
               type: lorentz
           solver:
-            fitreportdir: /path/to/fitreportdir/directory/
+            fitreportdir: /data/data_lmt/toltec/reduced
         mapmaking: # mapmaking parameters
           histogram:
             n_bins: 20 # number of histogram bins (>0)
@@ -66,22 +66,22 @@ reduce:
           cunit: MJy/sr # units (MJy/sr or mJy/beam)
           grouping: auto # mapmaking grouping (detector,nw, array.  use auto for now)
           method: naive # mapmaking algorithm (naive or jinc)
-          pixel_axes: icrs # reference frame (icrs or altaz)
+          pixel_axes: altaz # reference frame (icrs or altaz)
           pixel_size_arcsec: 1.0 # pixel size in arceconds
           x_size_pix: 0 # manually specify map columns
           y_size_pix: 0 # manually specify map rows
         runtime: # parameters to control how citlali runs
-          verbose: true # extra output in terminal.  adds files to obsnum/logs/ directory.
+          verbose: false # extra output in terminal.  adds files to obsnum/logs/ directory.
           meta:
             version: tolteca... # extra info from tolteca
-          n_threads: 8 # number of threads to use
+          n_threads: 12 # number of threads to use
           #output_dir: /path/to/redu/directory/ # path to output directory
-          parallel_policy: omp # parallelization policy (seq=sequential, omp=OMP parallelization)
-          reduction_type: science # reduction engine (science, pointing, beammap)
+          parallel_policy: seq # parallelization policy (seq=sequential, omp=OMP parallelization)
+          reduction_type: pointing # reduction engine (science, pointing, beammap)
           use_subdir: true # create "redu00, redu01,..." sub-directories.  increments automatically.
         source_fitting: # parameters for source fitting
           bounding_box_arcsec: 10 # size of box in arcseconds around initial position
-          enabled: false # enable or disable fitting (ignored for now)
+          fitting_region_arcsec: 0 # region of map to search for source in (ignored for now)
           initial_guess: brightest_pixel # initial position (ignored for now)
           model: gaussian # model type (ignored for now)
         timestream: # timestream reduction parameters
@@ -100,7 +100,7 @@ reduce:
             time_constant_sec: 0.015 # spike decay time
             window_size: 32 # number of samples to flag on either side of spike (ignored if TOD filtering)
           downsample: # downsample the data
-            enabled: false # enable or disable downsampling
+            enabled: true # enable or disable downsampling
             factor: 2 # downsample factor (integer only)
           filter: # tod filtering
             a_gibbs: 50.0 # Kaiser-Bessel filter shape param
@@ -118,12 +118,12 @@ reduce:
             chunk_type: rtc # type of chunks to output (rtc or ptc)
             enabled: false # enable or disable TOD output
           calibration: # flux calibration
-            enabled: false # enable or disable flux calibration (ignored for beammapping)
+            enabled: true # enable or disable flux calibration (ignored for beammapping)
             extinction_model: am_q25 # model to use for tau calculation (am_q25, am_q50, am_q75)
           polarimetry: # polarized reduction
             enabled: false # enable or disable polarized reduction
           weighting: # how to weight data and maps
-            type: approximate # type of TOD weighting (full=use scan varaince/approximate=use det sensitivity)
+            type: full # type of TOD weighting (full=use scan varaince/approximate=use det sensitivity)
             lower_std_factor: 0.0 # flag detectors below this stddev limit (ignored if 0)
             upper_std_factor: 0.0 # flag detectors above this stddev limit (ignored if 0)
         wiener_filter: # controls for wiener filter
