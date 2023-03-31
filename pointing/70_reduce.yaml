@@ -7,48 +7,58 @@ reduce:
     # version: '~=1.2'
     config:
       cal_items:
-      - type: photometry
-        beammap_source:
-          name: S1
-          ra_deg: 180.
-          dec_deg: 0.
+      - beammap_source: # extra information used by beammapping (not needed if redu_type!=beammap)
           fluxes:
-          - array_name: a1100
-            value_mJy: 2000.
-            uncertainty_mJy: 0.05
-          - array_name: a1400
-            value_mJy: 2000.
-            uncertainty_mJy: 0.05
-          - array_name: a2000
-            value_mJy: 2000.
-            uncertainty_mJy: 0.05
-        extinction:
-          model_name: "some_model"
-          tau_220: 0.3
-      - type: astrometry
-        pointing_offsets:
-        - axes_name: az
-          value_arcsec: 0
-        - axes_name: alt
-          value_arcsec: 0
+            - array_name: a1100
+              uncertainty_mJy: 0.0 # 1.1 mm flux uncertainty in mJy
+              value_mJy: 1.0 # 1.1 mm flux in mJy
+            - array_name: a1400
+              uncertainty_mJy: 0.0 # 1.4 mmflux uncertainty in mJy
+              value_mJy: 1.0 # 1.4 mm flux in mJy
+            - array_name: a2000
+              uncertainty_mJy: 0.0 # 2.0 mm flux uncertainty in mJy
+              value_mJy: 1.0 # 2.0 mm flux in mJy
+        type: photometry
+      - pointing_offsets: # additional pointing offsets to apply
+          - axes_name: az
+            value_arcsec: [0.0]
+          - axes_name: alt
+            value_arcsec: [0.0]
+        type: astrometry
       low_level:
-        kids:
-          fitter:
-            modelspec: gainlintrend
-            weight_window:
-              fwhm_Hz: 1.5e4
-              type: lorentz
-          solver:
-              fitreportdir: /data/data_lmt/toltec/reduced
-        runtime:
-          parallel_policy: omp # seq, omp, tbb
-          n_threads: 8 # number of threads to parallelize over
-          use_subdir: true #make a unique sub directory for each run
-          reduction_type: pointing #beammap, poiniting, etc
-          meta:
-            version: tolteca...
-            #high level config settings
-        interface_sync_offset: #dict for each toltec[0..12]+hwp+lmt/  #match keys with file interface key
+        beammap: # beammap controls (ignored if not beammapping)
+          iter_max: 1 # maximum number of iterations for beammapping
+          derotate: false # derotate beammap to zero elevation
+          subtract_reference_det: true # enable subtraction of reference detector position
+          reference_det: -99 # reference detector index for APT positions (if <0 and enabled, use detector closest to median)
+          iter_tolerance: 0.0 # tolerance for iterations (if 0 all iterations are performed, tod output will be for last iteration)
+          sens_psd_lower_limit: 0 # lower limit for psd in sensitivity calculation
+          sens_psd_upper_limit: 0 # upper limit for psd in sensitivity calculation
+          flagging: # these parameters control how the beammapping algorithm flags bad detectors
+            lower_fwhm_arcsec: # lower limits for fitted fwhm values (used for flagging only)
+              a1100: 3
+              a1400: 3
+              a2000: 3
+            upper_fwhm_arcsec: # upper limits for fitted fwhm values (used for flagging only)
+              a1100: 20
+              a1400: 20
+              a2000: 20
+            lower_sig2noise: # lower limits for fitted S/N values (used for flagging only)
+              a1100: 5
+              a1400: 5
+              a2000: 5
+            max_dist_arcsec: # max allowed distance from mean of all positions (ignored if 0, flagging only)
+              a1100: 0
+              a1400: 0
+              a2000: 0
+            lower_sens_factor: 0.0 # per network lower multiplicative factor on median sensitivty (ignored if 0)
+            upper_sens_factor: 10.0 # per network upper multiplicative factor on median sensitivty (ignored if 0)
+        coadd: # coaddition controls
+          enabled: false # enable or disable coaddition
+        noise_maps: # noise map controls (coadded noise maps if coadd enabled, obs noise maps if disabled)
+          enabled: false # enable or disable coaddition
+          n_noise_maps: 1 # number of noise maps (>0)
+        interface_sync_offset: # manual timing offsets for each nw/hwp (in seconds)
           - toltec0: 0
           - toltec1: 0
           - toltec2: 0
@@ -62,78 +72,123 @@ reduce:
           - toltec10: 0
           - toltec11: 0
           - toltec12: 0
-          - hwp: 0
-        timestream:
-          polarimetry:
-            enabled: false
-          output:
-            enabled: false
-            format: netcdf
-            chunk_type: rtc #ptc
-          chunking:
-            length_sec: 10.0
-          weighting:
-            type: approximate #approximate
-          despike:
-            enabled: false
-            min_spike_sigma: 8.0
-            time_constant_sec: 0.015
-            window_size: 32
-          filter:
-            enabled: false
-            a_gibbs: 50.0
-            freq_high_Hz: 16.0
-            freq_low_Hz: 0.0
-            n_terms: 32
-          downsample:
-            enabled: true
-            factor: 1
-          kernel:
-            enabled: true
-            filepath: null
-            image_ext_name: signal
-            type: internal_gaussian #image, internal_airy
-          clean:
-            enabled: true
-            cut_std: 0.0
-            grouping: array_name
-            n_eig_to_cut: 3
-        mapmaking:
-          enabled: true
-          cunit: "MJy/Sr" # mJy/beam
-          crpix1: 0
-          crpix2: 0
-          crval1_J2000: 0
-          crval2_J2000: 0
-          grouping: array_name
-          method: naive
-          pixel_axes: altaz
-          pixel_size_arcsec: 1.0
-          x_size_pix: 0
-          y_size_pix: 0
-        beammap:
-          iter_tolerance: 0.05
-          iter_max: 5
-        source_fitting:
-          enabled: false
-          model: gaussian
-          bounding_box_arcsec: 10
-          initial_guess: brightest_pixel #table
-        coadd:
-          enabled: false
-          cov_cut: 0.75
-          noise_maps:
-            enabled: false
-            n_noise_maps: 30
-          filtering:
-            enabled: true
-            type: wiener_filter
-        wiener_filter:
-          gaussian_template: true
-          gaussian_template_fwhm_arcsec:
+          - hwpr: 0
+        kids: # kids fitting parameters
+          fitter:
+            modelspec: gainlintrend
+            weight_window:
+              fwhm_Hz: 1.5e4
+              type: lorentz
+          solver:
+            fitreportdir: /data/data_lmt/toltec/reduced # directory to grab fit report from
+            parallel_policy: seq # parallel policy for kids solver (independent of citlali parallel_policy)
+        mapmaking: # mapmaking parameters
+          enabled: true # enable or disable mapmaking (for TOD processing only)
+          crpix1: 0 # ref pixel 1 (ignored if 0)
+          crpix2: 0 # ref pixel 2 (ignored if 0)
+          crval1_J2000: 0 # ref value 1 (ignored if 0)
+          crval2_J2000: 0 # ref value 2 (ignored if 0)
+          cunit: mJy/beam # units (MJy/sr or mJy/beam.  apt table flux conversion default is mJy/beam)
+          grouping: auto # mapmaking grouping (auto, detector, nw, array)
+          method: naive # mapmaking algorithm (naive or jinc)
+          pixel_axes: altaz # reference frame (icrs or altaz)
+          pixel_size_arcsec: 1.0 # pixel size in arceconds
+          x_size_pix: 0 # manually specify map columns
+          y_size_pix: 0 # manually specify map rows
+          coverage_cut: 0.0 # coverage cut value for psd, hist, and coverage_bool maps
+          jinc_filter: # parameters to control jinc filter shape
+            r_max: 3.0 # max radius to apply filter to (max radius = r_max x lambda/diameter)
+            a: 1.1 # shape parameter
+            b: 4.75 # shape parameter
+            c: 2.0 # shape parameter
+        runtime: # parameters to control how citlali runs
+          verbose: false # extra output in terminal.  adds files to obsnum/logs/ directory. sequential mode only.
+          meta:
+            version: tolteca... # extra info from tolteca
+          n_threads: 6 # number of threads to use
+          output_dir: . # path to output directory
+          parallel_policy: omp # parallelization policy (seq=sequential, omp=OpenMP parallelization)
+          reduction_type: pointing # reduction engine (science, pointing, beammap)
+          use_subdir: true # create "redu00, redu01,..." sub-directories.  increments automatically.
+        timestream: # timestream reduction parameters
+          type: xs # type of TOD (xs, rs, is, qs)
+          enabled: true # enable or disable TOD processing (to be implemented)
+          chunking: # how to chunk timestreams
+            turnaround_samples_to_cut: 0 # number of samples to cut at turnarounds (0 uses hold signal only, debugging only!)
+            force_chunking: false # ignore map pattern chunking and use config file chunk length
+            length_sec: 10.0 # chunk length for lissajous/rastajous maps (ignored if raster map)
+          polarimetry: # polarized reduction
+            enabled: false # enable or disable polarized reduction
+          output: # controls options for writing out TOD as netCDF file
+            subdir_name: null # optional subdirectory name for tod output files (ignored if null)
+          raw_time_chunk:
+            despike: # remove cosmic ray spikes
+              enabled: false # enable or disable despiking
+              min_spike_sigma: 8.0 # minimum spike sigma value (n x sigma of TOD)
+              time_constant_sec: 0.015 # spike decay time
+              window_size: 32 # number of samples to flag on either side of spike (ignored if TOD filtering)
+            downsample: # downsample the data
+              enabled: true # enable or disable downsampling
+              factor: 3 # downsample factor (integer only, ignored if <=0)
+              downsampled_freq_Hz: 0 # specify downsample frequency (used if factor<=0, must be <= raw sampling factor)
+            filter: # tod filtering
+              a_gibbs: 50.0 # Kaiser-Bessel filter shape param
+              enabled: true # enable or disable tod filtering
+              freq_high_Hz: 16.0 # upper freq limit
+              freq_low_Hz: 0.0 # lower freq limit
+              n_terms: 32 # size of filter in samples
+            kernel: # make synthetic timestreams for reduction characterization
+              enabled: false # enable or disable kernel generation
+              filepath: null # filepath to FITS file with kernel
+              fwhm_arcsec: 0 # manually specify fwhm for gaussian/airy kernel (ignored if 0)
+              image_ext_name: signal # extention name if FITS file
+              type: gaussian # how to make kernel (gaussian, airy, fits)
+            flux_calibration: # flux calibration
+              enabled: true # enable or disable flux calibration (ignored for beammapping)
+            extinction_correction:
+              enabled: true
+              extinction_model: am_q25 # model to use for tau calculation (am_q25, am_q50, am_q75)
+            flagging: # controls flagging before cleaning
+              delta_f_min_Hz: 60.e3 # lower limit on frequency separation for flagging tones
+              lower_weight_factor: 0.0 # flag detectors below this weight limit (ignored if 0, weight=1/variance of TOD)
+              upper_weight_factor: 0.0 # flag detectors above this weight limit (ignored if 0, weight=1/variance of TOD)
+            output:
+              enabled: false # enable or disable rtc TOD output
+          processed_time_chunk:
+            clean: # remove (hopefully) the atmospheric signal
+              stddev_limit: 0.0 # standard deviation cut for cleaning (only used if >0)
+              enabled: true # enable or disable cleaning
+              grouping: [nw] # clean grouping (array, nw, all)
+              n_eig_to_cut: [10] # number of eigenvalues to remove (if stddev_limit >0, calc this many eigs, if this is 0, calc all eigs)
+            weighting: # how to weight data and maps
+              type: approximate # type of TOD weighting (full=use scan variance/approximate=use det sensitivity)
+            flagging: # controls flagging after cleaning
+              lower_weight_factor: 0.0 # flag detectors below this weight limit (ignored if 0, weight=1/variance of TOD)
+              upper_weight_factor: 0.0 # flag detectors above this weight limit (ignored if 0, weight=1/variance of TOD)
+            output:
+              enabled: false # enable or disable ptc TOD output
+        post_processing:
+          source_fitting: # parameters for source fitting
+            bounding_box_arcsec: 10 # size of box in arcseconds around initial position
+            fitting_region_arcsec: 0 # region of map to search for source in (ignored if zero)
+            model: gaussian # model type (ignored for now)
+            gauss_model: # optional fitting limits for guassian model (ignored if zero)
+              amp_limits: [0.0, 0.0] # upper and lower multiplicative factors for amplitude fitting
+              fwhm_limits: [0.0, 0.0] # upper and lower multiplicative factors for fwhm fitting
+          map_filtering: # map filtering (if coadd enabled, filters coadded map, if disabled, filters obs maps)
+            enabled: false # enable or disable map filtering
+            type: wiener_filter # type of map filter (currently ignored, default is wiener filter)
+            normalize_errors: false # correct weight map errors based on noise maps
+          map_histogram_n_bins: 20 # number of histogram bins (>0)
+          source_finding: # parameters to control source finding
+            enabled: false # enable or disable source finding
+            source_sigma: 0.0 # minimum sigma for source
+            source_window_arcsec: 0 # window around each source to mask
+            mode: default # defines how to search for sources (default=signal map, negative=-signal map, both)
+        wiener_filter: # controls for wiener filter
+          template_type: kernel #  template (kernel, gaussian, airy, highpass)
+          gaussian_template_fwhm_arcsec: # set fwhms for gaussian template
             a1100: 5
             a1400: 6.3
             a2000: 9.5
-          lowpass_only: false
-          highpass_only: false
-          normalize_error: false
+          lowpass_only: false # apply lowpassing only
