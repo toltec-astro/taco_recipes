@@ -1,4 +1,5 @@
 #ObservingScript -Name  "10_toltec_detector_tests/03_drivefit_test_5steps_confirm.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+ObsGoal Dcs;  Dcs  -ObsGoal DriveFitConfirm
 ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] FILE -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
 Tune Cal;  Cal  -CalMode Tune
 On -TScan  60 -NSamp 1 -NumRepeats 1 -NumScans 1
