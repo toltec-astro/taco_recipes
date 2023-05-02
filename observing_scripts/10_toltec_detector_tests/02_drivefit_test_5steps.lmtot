@@ -1,0 +1,19 @@
+#ObservingScript -Name  "10_toltec_detector_tests/02_drivefit_test_5steps.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+ObsGoal Dcs;  Dcs  -ObsGoal DriveFit
+Source Source;  Source  -Az[0] 180.000000 -Az[1] 180.000000 -B[0] 0.0 -B[1] 0.0 -BaselineList [] -CoordSys Ho -DecProperMotionCor 0 -Dec[0] 00:00:00.0 -Dec[1] 00:00:00.0 -El[0] 90.000000 -El[1] 90.000000 -EphemerisTrackOn 0 -Epoch 0.0 -GoToZenith 0 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 00:00:00.00 -Ra[1] 00:00:00.00 -SourceName fixed90 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+On -TScan  0 -NSamp 1 -NumRepeats 1 -NumScans 1
+ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] LUT -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
+Tune Cal;  Cal  -CalMode Tune
+On -TScan  60 -NSamp 1 -NumRepeats 1 -NumScans 1
+ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset -2
+TargSweep Cal;  Cal  -CalMode TargSweep
+On -TScan  60 -NSamp 1 -NumRepeats 1 -NumScans 1
+DcsSubObsMode Dcs;  Dcs  -SubObsMode 1
+Loop -loop_name  Loop -loop_repeat 4 -loop_when EndOfLoop
+ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset 1
+TargSweep Cal;  Cal  -CalMode TargSweep
+On -TScan  60 -NSamp 1 -NumRepeats 1 -NumScans 1
+endLoop
+ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset -2
+DcsSubObsMode Dcs;  Dcs  -SubObsMode 0
+ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] FILE -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
