@@ -97,7 +97,7 @@ reduce:
           y_size_pix: 0 # manually specify map rows
           coverage_cut: 0.0 # coverage cut value for psd, hist, and coverage_bool maps
           jinc_filter: # parameters to control jinc filter shape
-            r_max: 3.0 # max radius to apply filter to (max radius = r_max x lambda/diameter)
+            r_max: 1.5 # max radius to apply filter to (max radius = r_max x lambda/diameter)
             a: 1.1 # shape parameter
             b: 4.75 # shape parameter
             c: 2.0 # shape parameter
@@ -128,17 +128,17 @@ reduce:
               time_constant_sec: 0.015 # spike decay time
               window_size: 32 # number of samples to flag on either side of spike (ignored if TOD filtering)
             downsample: # downsample the data
-              enabled: true # enable or disable downsampling
+              enabled: false # enable or disable downsampling
               factor: 3 # downsample factor (integer only, ignored if <=0)
               downsampled_freq_Hz: 0 # specify downsample frequency (used if factor<=0, must be <= raw sampling factor)
             filter: # tod filtering
               a_gibbs: 50.0 # Kaiser-Bessel filter shape param
-              enabled: true # enable or disable tod filtering
+              enabled: false # enable or disable tod filtering
               freq_high_Hz: 16.0 # upper freq limit
               freq_low_Hz: 0.0 # lower freq limit
               n_terms: 32 # size of filter in samples
             kernel: # make synthetic timestreams for reduction characterization
-              enabled: false # enable or disable kernel generation
+              enabled: true # enable or disable kernel generation
               filepath: null # filepath to FITS file with kernel
               fwhm_arcsec: 0 # manually specify fwhm for gaussian/airy kernel (ignored if 0)
               image_ext_name: signal # extention name if FITS file
@@ -156,11 +156,13 @@ reduce:
               enabled: false # enable or disable rtc TOD output
           processed_time_chunk:
             clean: # remove (hopefully) the atmospheric signal
+              clean_polarized_maps: false # carry out cleaning on Q and U maps as well as I maps
               stddev_limit: 0.0 # standard deviation cut for cleaning (only used if >0)
               enabled: true # enable or disable cleaning
               grouping: [nw] # clean grouping (array, nw, all)
-              n_eig_to_cut: [10] # number of eigenvalues to remove (if stddev_limit >0, calc this many eigs, if this is 0, calc all eigs)
+              n_eig_to_cut: [3] # number of eigenvalues to remove (if stddev_limit >0, calc this many eigs, if this is 0, calc all eigs)
             weighting: # how to weight data and maps
+              set_high_weights_to_median: false # set all weights above median to median of unflagged detectors
               type: approximate # type of TOD weighting (full=use scan variance/approximate=use det sensitivity)
             flagging: # controls flagging after cleaning
               lower_weight_factor: 0.0 # flag detectors below this weight limit (ignored if 0, weight=1/variance of TOD)
@@ -169,8 +171,8 @@ reduce:
               enabled: false # enable or disable ptc TOD output
         post_processing:
           source_fitting: # parameters for source fitting
-            bounding_box_arcsec: 10 # size of box in arcseconds around initial position
-            fitting_region_arcsec: 0 # region of map to search for source in (ignored if zero)
+            bounding_box_arcsec: 15 # size of box in arcseconds around initial position
+            fitting_region_arcsec: 50 # region of map to search for source in (ignored if zero)
             model: gaussian # model type (ignored for now)
             gauss_model: # optional fitting limits for guassian model (ignored if zero)
               amp_limits: [0.0, 0.0] # upper and lower multiplicative factors for amplitude fitting
