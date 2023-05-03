@@ -1,2 +1,4 @@
 #ObservingScript -Name  "toltec_obs_scripts/50_toltec_obs_step_and_tune.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+ObsGoal Dcs;  Dcs  -ObsGoal Move
+ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 SkyDip -DipMode  StepAndTune -ElStart 90 -ElEnd 50 -ElVel 0 -ElStep 10 -SampleTime 0
