@@ -1,0 +1,18 @@
+#ObservingScript -Name  "//wsl.localhost/Ubuntu_2004/home/ma/W-Ma/toltec/toltec_astro_v2/taco_recipes/observing_scripts/10_toltec_detector_tests/05_drivefit_test_10steps_confirm.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+ObsGoal Dcs;  Dcs  -ObsGoal drivefit_confirm_with_timestream
+ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] FILE -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
+ToltecRoachTargLoadFromFile ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd targ_load_from_file
+TargSweep Cal;  Cal  -CalMode TargSweep
+ToltecRoachTargReduce ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd targ_reduce
+ToltecRoachTargLoadFromFile ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd targ_load_from_file
+Tune Cal;  Cal  -CalMode Tune
+On -TScan  30 -NSamp 1 -NumRepeats 1 -NumScans 1
+ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset -10 -RoachCmd null
+DcsSubObsMode Dcs;  Dcs  -SubObsMode 1
+Loop -loop_name  Loop -loop_repeat 10 -loop_when EndOfLoop
+TargSweep Cal;  Cal  -CalMode TargSweep
+On -TScan  30 -NSamp 1 -NumRepeats 1 -NumScans 1
+ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset 2 -RoachCmd null
+endLoop
+ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset -10 -RoachCmd null
+DcsSubObsMode Dcs;  Dcs  -SubObsMode 0
