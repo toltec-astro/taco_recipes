@@ -1,6 +1,7 @@
 #ObservingScript -Name  "//wsl.localhost/Ubuntu_2004/home/ma/W-Ma/toltec/toltec_astro_v2/taco_recipes/observing_scripts/00_toltec_obs/11_toltec_detector_init_manual.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
-ObsGoal Dcs;  Dcs  -ObsGoal DetectorInit
+ObsGoal Dcs;  Dcs  -ObsDesc "Detector Initalization" -ObsGoal Calibration
 ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+ToltecRoachSampleFreqSet ToltecBackend;  ToltecBackend  -RoachArg[0] 122 -RoachCmd samplefreq_set -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
 ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] LUT -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
 ToltecRoachVnaLoad ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd vna_load
 VnaSweep Cal;  Cal  -CalMode VnaSweep

@@ -1,10 +1,7 @@
 #ObservingScript -Name  "//wsl.localhost/Ubuntu_2004/home/ma/W-Ma/toltec/toltec_astro_v2/taco_recipes/observing_scripts/10_toltec_detector_tests/01_vna_vs_elev_90-20-5.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
-Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2023-S1-TolTEC-Commissioning
-Toltec -PointCorDr[0]  0.0 -PointCorDu[0] 0.0 -PointCorDr[1] 0.0 -PointCorDu[1] 0.0
 ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0
-ObsGoal Dcs;  Dcs  -ObsGoal vnasweep_vs_elev
+ObsGoal Dcs;  Dcs  -ObsDesc vnasweep_vs_elev -ObsGoal Calibration
 ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] LUT -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
 ToltecRoachVnaLoad ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd vna_load
 Source Source;  Source  -Az[0] 180.000000 -Az[1] 180.000000 -B[0] 0.0 -B[1] 0.0 -BaselineList [] -CoordSys Ho -DecProperMotionCor 0 -Dec[0] 00:00:00.0 -Dec[1] 00:00:00.0 -El[0] 90.000000 -El[1] 90.000000 -EphemerisTrackOn 0 -Epoch 0.0 -GoToZenith 0 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 00:00:00.00 -Ra[1] 00:00:00.00 -SourceName fixed90 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
