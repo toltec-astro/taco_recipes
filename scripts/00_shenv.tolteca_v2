@@ -1,0 +1,36 @@
+# vim: syntax=bash
+
+scriptdir=$(dirname "$(readlink -f "$0")")
+
+## directories
+dataroot=${HOME}/toltec_astro_v2/run/data_lmt
+dataprodroot=${HOME}/toltec_astro_v2/run/dataprod_toltec
+
+scratchdir=${dataprodroot}/scratch
+if [[ -e ${SCRATCHDIR} ]]; then
+    scratchdir=${SCRATCHDIR}
+fi
+echo "use scratch ${scratchdir}"
+
+## pyenv
+python_venv_root=${HOME}/.pyenv/versions
+if [[ ! $1 ]]; then
+    pyenv_name=tolteca_v2
+else
+    pyenv_name=$1
+fi
+echo "use pyenv ${pyenv_name}"
+
+pybindir="${python_venv_root}/${pyenv_name}/bin"
+toltecaexec=${pybindir}/tolteca
+
+
+function print_env {
+    echo "loaded tolteca env:"
+    echo "    scriptdir: ${scriptdir}"
+    echo "     dataroot: ${dataroot}"
+    echo " dataprodroot: ${dataprodroot}"
+    echo "   scratchdir: ${scratchdir}"
+    echo "     pybindir: ${pybindir}"
+    echo ""
+}
