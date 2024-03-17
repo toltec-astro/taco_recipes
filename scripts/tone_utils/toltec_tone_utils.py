@@ -156,6 +156,7 @@ class TlalocEtcDataStore:
         self._etcdir = etcdir
         self._subdir_by_nw = self._get_subdir_by_nw(etcdir)
         self._file_suffix = None
+        self._do_dry_run = False
 
     @classmethod
     def _get_subdir_by_nw(cls, etcdir):
@@ -204,6 +205,13 @@ class TlalocEtcDataStore:
         self._file_suffix = suffix
         yield self
         self._file_suffix = None
+        return
+
+    @contextmanager
+    def dry_run(self):
+        self._do_dry_run = True
+        yield self
+        self._do_dry_run = False
         return
 
     def get_item_path(self, nw, item):
@@ -439,7 +447,10 @@ class TlalocEtcDataStore:
             raise ValueError("cannot find network id to write to.")
         outpath = self.get_item_path(nw, item)
         logger.debug(f"write validated {item} data to {outpath}\n{tbl}")
-        tbl.write(outpath, format=tbl_fmt, overwrite=True)
+        if self._do_dry_run:
+            print(f"DRY RUN: {outpath=}\n{tbl}")
+        else:
+            tbl.write(outpath, format=tbl_fmt, overwrite=True)
         return outpath
 
     def write_targ_amps_table(self, tbl, nw=None):
@@ -502,7 +513,10 @@ class TlalocEtcDataStore:
         for old, new in paths.values():
             logger.debug(
                 f"rename file {old.name} -> {new.name} in {old.parent.name}")
-            old.rename(new)
+            if self._do_dry_run:
+                print(f"DRY RUN: rename {old.name} -> {new.name} in {old.parent.name}")
+            else:
+                old.rename(new)
         return paths
 
     def backup_tone_prop_files(self, nw, suffix='backup', items=None):
