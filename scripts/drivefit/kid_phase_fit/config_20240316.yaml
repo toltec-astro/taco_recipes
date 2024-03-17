@@ -8,7 +8,7 @@ load:
 save: 
    # can run these all in the same instance,
    # set to True (False) to turn each option on (off)
-   use_save_fig:  True
+   use_save_fig:  False
    use_save_pdf:  False
    use_save_file: True
    save_name:     adrv
