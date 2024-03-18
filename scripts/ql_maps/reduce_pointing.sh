@@ -38,16 +38,22 @@ echo use apt filename ${apt_filename}
 echo "reduce pointing obsnum=${obsnum}"
 
 obsnum_str=$(printf "%06d" ${obsnum})
+#
+# link files to input folder
+set -x
+tel_file=${dataroot}/tel/tel_toltec*_${obsnum_str}_*.nc
+
+ln -sf ${tel_file} ${rcdir}/data/
+ln -sf ${dataroot}/toltec/tcs/toltec*/toltec*_${obsnum_str}_*.nc ${rcdir}/data/
+ln -sf ${dataroot}/toltec_clip{a,o}/reduced/toltec*_${obsnum_str}_*.txt ${rcdir}/data/
+
 
 set +e
 
-# link files to input folder
-tel_file=${dataroot}/tel/tel_toltec*_${obsnum_str}_*.nc
-apt_in_file=${commondir}/apt_GW_v8_with_fg_pg_loc_ori_flipped_flag.ecsv
-
 
 # run match apt with current obs
-set -x
+
+apt_in_file=${commondir}/apt_GW_v8_with_fg_pg_loc_ori_flipped_flag.ecsv
 ${pybindir}/python3 ${scriptdir}/make_matched_apt.py \
     --data_rootpath ${dataroot}\
     --apt_in_file ${apt_in_file} \
@@ -57,9 +63,7 @@ ${pybindir}/python3 ${scriptdir}/make_matched_apt.py \
 apt_matched_file=${rcdir}/data/apt_${obsnum}_matched.ecsv
 
 set +x
-ln -sf ${tel_file} ${rcdir}/data/
 ln -sf ${apt_matched_file} ${rcdir}/data/${apt_filename}
-ln -sf ${dataroot}/toltec/tcs/toltec*/toltec*_${obsnum_str}_*.nc ${rcdir}/data/
 
 # run tolteca reduce
 $toltecaexec -d ${rcdir} -g -- reduce --jobkey reduced/${obsnum} \

@@ -62,7 +62,7 @@ if __name__ == '__main__':
     if args.obsnum == 'none':
         fits_files = np.sort(glob.glob(input_path+'/toltec*pointing*.fits'))
     else:
-        fits_files = np.sort(glob.glob(input_path+'/toltec*pointing*'+args.obsnum.zfill(6)+'.fits'))
+        fits_files = np.sort(glob.glob(input_path+'/toltec*pointing*'+args.obsnum.zfill(6)+'_citlali.fits'))
 
     # check if there are any FITS files
     if fits_files.size == 0:
