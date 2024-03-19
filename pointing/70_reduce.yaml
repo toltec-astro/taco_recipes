@@ -182,7 +182,7 @@ reduce:
         post_processing:
           source_fitting: # parameters for source fitting
             bounding_box_arcsec: 10 # size of box in arcseconds around initial position
-            fitting_radius_arcsec: 0 # radius from center map to search for source in (ignored if zero or if source finding)
+            fitting_radius_arcsec: 30 # radius from center map to search for source in (ignored if zero or if source finding)
             model: gaussian # model type (ignored for now)
             gauss_model: # optional fitting limits for guassian model (ignored if zero)
               amp_limit_factors: [0.0, 0.0] # upper and lower multiplicative factors for amplitude fitting

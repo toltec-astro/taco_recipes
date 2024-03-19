@@ -475,9 +475,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("filepaths", nargs='+')
-    # parser.add_argument(
-    #     '--search_paths', nargs='*',
-    #     )
+    parser.add_argument(
+        '--search_paths', nargs='*',
+        )
     parser.add_argument(
         '--apt_design',
         )
@@ -527,10 +527,14 @@ if __name__ == "__main__":
     if not ql_output_dir.exists():
         ql_output_dir.mkdir(parents=True)
 
+    search_paths = option.search_paths or []
+    search_paths.append(
+            output_dir,
+            )
     ql_prods = make_quicklook_prod(
         bods,
         show_plot=option.show_plot,
-        output_dir=ql_output_dir, search_paths=[output_dir], apt_design=apt)
+        output_dir=ql_output_dir, search_paths=search_paths, apt_design=apt)
 
     # call Nat's vna checker
     if tbl['filesuffix'][0] == 'vnasweep':

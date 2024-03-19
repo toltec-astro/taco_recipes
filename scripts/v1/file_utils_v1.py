@@ -19,8 +19,9 @@ def get_dataset_of_latest_obsnum(data_lmt_path='/data_lmt'):
     if not links:
         return None
     dataset = BasicObsDataset.from_files([link.resolve() for link in links])
-    dataset.sort(['ut'])
+    dataset.sort(['scannum', 'ut'])
     obsnum = dataset[-1]['obsnum']
+    print(dataset.index_table)
     # return dataset[dataset['obsnum'] == obsnum]
     return BasicObsDataset(dataset.index_table[dataset['obsnum'] == obsnum])
 
@@ -35,7 +36,7 @@ def get_dataset(data_lmt_path, obsnum):
     if not links:
         return None
     dataset = BasicObsDataset.from_files([link.resolve() for link in links])
-    dataset.sort(['interface'])
+    dataset.sort(['interface', "scannum"])
     return dataset
 
 
@@ -46,7 +47,7 @@ def get_subobsnum(dataset):
     return dataset[-1]['subobsnum']
 
 def get_scannum(dataset):
-    return dataset[-1]['scannum']
+    return max(s for s in dataset.index_table['scannum'])
 
 def get_obs_goal(dataset):
     if dataset[0]['master_name'] != 'tcs':
