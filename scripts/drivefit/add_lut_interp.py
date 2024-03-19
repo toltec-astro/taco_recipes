@@ -8,7 +8,7 @@ from netCDF4 import Dataset
 
 
 def _get_tone_amps(nc):
-    if "Header.Toltec.ToneAmp" in np.variables:
+    if "Header.Toltec.ToneAmp" in nc.variables:
         ## new change 20240316
         toneAmps = nc.variables["Header.Toltec.ToneAmp"][:].data.T[:, 0]
     else:
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     tune_path = sys.argv[1]
     tune = Dataset(tune_path)
 
-    tone_amps_lut = _get_tone_amps(nc)
+    tone_amps_lut = _get_tone_amps(tune)
 
     tone_amps_lut[tone_amps_lut <= 0] = np.nan
     print(tone_amps_lut)
