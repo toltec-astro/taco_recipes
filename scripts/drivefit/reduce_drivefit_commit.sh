@@ -3,7 +3,7 @@
 ## env settings
 
 shenv_name="tolteca_v2"
-pyenv_name="tolteca_v2"
+pyenv_name="tolteca_v1"
 
 ## load env (do not edit)
 scriptdir=$(dirname "$(readlink -f "$0")")
@@ -12,16 +12,24 @@ _source ${scriptdir}/../00_shenv.${shenv_name} ${pyenv_name}
 print_env || { echo 'unable to load script env, exit.' ; exit 1; }
 
 ## actual script starts form here
+# set -eo pipefail
+
+function file_utils_py_call {
+    ${pybindir}/python3 ${scriptdir}/file_utils_v1.py \
+        $@ \
+        --data_lmt_path=${dataroot}
+}
+
 
 if [[ ! $1 ]]; then
-    obsnum=$(${pybindir}/python3 ${scriptdir}/../utils/get_latest_obsnum.py)
-    echo "DriveFit: found latest obsnum ${obsnum}"
+    obsnum=$(file_utils_py_call obsnum)
+    echo found latest obsnum ${obsnum}
 else
     obsnum=$1
 fi
 
 if [[ ! $2 ]]; then
-    obsnum_current=$(${pybindir}/python3 ${scriptdir}/../utils/get_latest_obsnum.py)
+    obsnum_current=$(file_utils_py_call obsnum)
     echo "DriveFit: found latest obsnum ${obsnum_current}"
 else
     obsnum_current=${obsnum}
@@ -57,10 +65,15 @@ for i in ${nws[@]}; do
     set -x
     ${pybindir}/python ${bin} -p ${perc} -- ${adrv_file} > ${adrv_log}
 
+    if (( i < 7 )); then
+        reduced=${dataroot}/toltec_clipa/reduced
+    else
+        reduced=${dataroot}/toltec_clipo/reduced
+    fi
     ${pybindir}/python ${bin_lut_interp} \
        ${dataroot}/toltec/?cs/toltec${i}/toltec${i}_${obsnum_str}_001*_targsweep.nc \
        ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.txt \
-       ${dataroot}/toltec/reduced{,_clipa,_clipo}/toltec${i}_${obsnum_str_current}_*_targfreqs.dat \
+       ${reduced}/toltec${i}_${obsnum_str_current}_*_targfreqs.dat \
 
     cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.lut.txt ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat
     set +x
