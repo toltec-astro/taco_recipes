@@ -1,0 +1,8 @@
+#ObservingScript -Name  "00_scripts/01_general_scripts/04_standard_beammap.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2024_TolTEC_Commissioning
+ObsGoal Dcs;  Dcs  -ObsGoal BeamMap
+Toltec
+ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+RasterMap Map;  Map  -ExecMode 0 -HPBW 1 -HoldDuringTurns 0 -MapCoord Az -MapMotion Continuous -NumPass 1 -NumRepeats 1 -NumScans 0 -RowsPerScan 1000000 -ScanAngle 0.0 -ScansPerCal 0 -ScansToSkip 0 -TCal 0 -TRef 0 -TSamp 1 -XLength 300 -XOffset 0 -XRamp 0 -XStep 50 -YLength 300.0 -YOffset 0 -YRamp 0 -YStep 1.5
