@@ -240,6 +240,7 @@ def _make_matched_apt_nw(apt_left, apt_right, Qr_at_500MHz=None, debug_plot_kw=N
         eps=eps.to_value(u.Hz),
         join_type='inner',
     )
+    bad_matched = bad_matched or []
     mbad_idx = np.where(~mgood)[0]
     bad_idx = np.where(~good)[0]
     logger.debug(f"matched n_good={np.sum(mgood)} n_bad={len(bad_matched)}")
@@ -376,6 +377,8 @@ def _match1d(x_left, x_right, eps, join_type='left', fill_id_value=None):
             'inner': '1and2',
             'outer': '1or2'
             }[join_type]
+    if len(x_left) == 0 or len(x_right)== 0:
+        return None
     result = stilts_match1d(left, right, 'x', eps, extra_args=[
         f'join={join}', 'find=best',
         'fixcols=all',

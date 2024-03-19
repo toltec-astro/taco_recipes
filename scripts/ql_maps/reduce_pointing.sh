@@ -67,7 +67,7 @@ ln -sf ${apt_matched_file} ${rcdir}/data/${apt_filename}
 
 # run tolteca reduce
 $toltecaexec -d ${rcdir} -g -- reduce --jobkey reduced/${obsnum} \
-    --inputs.0.select "obsnum == ${obsnum} & (scannum == ${scannum}) & (interface != \"toltec6\") & (interface !=\"toltec2\")" \
+    --inputs.0.select "obsnum == ${obsnum} & (scannum == ${scannum}) & (interface != \"toltec10\") & (interface !=\"toltec0\")" \
     --steps.0.path ~/toltec_astro_v2/citlali/build/bin/citlali
 # $toltecaexec -g -d ${rcdir} -- reduce --jobkey reduced/${obsnum} --inputs.0.select "(obsnum == ${obsnum}) & (scannum == ${scannum}) & (interface != \"toltec0\") & (interface != \"toltec6\")"
 # & (interface != \"toltec4\") & (interface != \"toltec6\") " #& (interface != \"toltec2\") & (interface != \"toltec3\") " #& (interface != \"toltec1\") & (interface != \"toltec4\") & (interface != \"toltec6\")"
