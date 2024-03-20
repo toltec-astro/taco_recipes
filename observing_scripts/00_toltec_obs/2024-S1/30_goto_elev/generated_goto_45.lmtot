@@ -1,0 +1,4 @@
+#ObservingScript -Name  "goto_90.lmtot" -Author "servo" -Date "Wed Mar 20 16:09:46 EDT 2024"
+Stay Telescope;  Telescope  -Stay Stay
+SourceEl Source;  Source  -CoordSys Po -El[0] 45 -El[1] 45
+On -TScan  0 -NSamp 1 -NumRepeats 1 -NumScans 1
