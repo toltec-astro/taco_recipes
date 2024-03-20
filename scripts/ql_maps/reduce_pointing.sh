@@ -38,6 +38,10 @@ echo use apt filename ${apt_filename}
 echo "reduce pointing obsnum=${obsnum}"
 
 obsnum_str=$(printf "%06d" ${obsnum})
+
+tune_obsnum=$((${obsnum} -1))
+tune_obsnum_str=$(printf "%06d" ${tune_obsnum})
+echo "tune_obsnum=${tune_obsnum}"
 #
 # link files to input folder
 set -x
@@ -46,7 +50,7 @@ tel_file=${dataroot}/tel/tel_toltec*_${obsnum_str}_*.nc
 ln -sf ${tel_file} ${rcdir}/data/
 ln -sf ${dataroot}/toltec/tcs/toltec*/toltec*_${obsnum_str}_*.nc ${rcdir}/data/
 ln -sf ${dataroot}/toltec_clip{a,o}/reduced/toltec*_${obsnum_str}_*.txt ${rcdir}/data/
-
+ln -sf ${dataroot}/toltec_clip{a,o}/reduced/toltec*_${tune_obsnum_str}_*.txt ${rcdir}/data/
 
 set +e
 

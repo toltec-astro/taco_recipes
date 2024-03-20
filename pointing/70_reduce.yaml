@@ -98,7 +98,7 @@ reduce:
             max_iterations: 50 # maximum number of iterations to run conjugate gradient for
             tolerance: 1e-20 # tolerance
         runtime: # parameters to control how citlali runs
-          verbose: true # extra debug output in terminal (same as -l debug).  adds summary files to obsnum/logs/ directory.
+          verbose: false # extra debug output in terminal (same as -l debug).  adds summary files to obsnum/logs/ directory.
           meta:
             version: tolteca... # extra info from tolteca
           n_threads: 1 # number of threads to use

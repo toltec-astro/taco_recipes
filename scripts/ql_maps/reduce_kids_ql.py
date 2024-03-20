@@ -32,6 +32,21 @@ def _find_file(patterns, search_paths, unique=True):
         return files
     return None
 
+def _ensure_find_file(*args, timeout=60, **kwargs):
+    wait = 10
+    counter = 0
+    import time
+    while True:
+        file = _find_file(*args, **kwargs)
+        if file is None:
+            if counter * wait > timeout:
+                logger.debug(f"waiting for file {args} timeout")
+                return None
+            logger.debug(f"waiting for file {args} ...")
+            time.sleep(wait)
+            counter += 1
+            continue
+        return file
 
 def _collect_kids_info(entry, search_paths):
     logger = get_logger()
@@ -51,7 +66,7 @@ def _collect_kids_info(entry, search_paths):
             return QTable.read(t, format='ascii')
         logger.warning("missing table")
         return None
-    tonelist_table = _load_table(_find_file([
+    tonelist_table = _load_table(_ensure_find_file([
         f"{prefix}*_tonelist.ecsv"
         ], search_paths))
     checktone_table = _load_table(_find_file([
