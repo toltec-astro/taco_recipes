@@ -482,6 +482,9 @@ if __name__ == "__main__":
         '--apt_design',
         )
     parser.add_argument(
+        '--data_lmt_root', default=None
+        )
+    parser.add_argument(
         '--output_dir', required=True
         )
     parser.add_argument(
@@ -496,8 +499,23 @@ if __name__ == "__main__":
     init_log(level=option.log_level)
     logger = get_logger()
 
+    if option.data_lmt_root is not None:
+        # replace the root directory
+        data_lmt_root = Path(option.data_lmt_root)
+        def _replace_root(p):
+            p = Path(p)
+            for pp in p.parents:
+                if pp.name == "data_lmt":
+                    subpath = p.relative_to(pp)
+                    break
+            else:
+                return p
+            return data_lmt_root.joinpath(subpath)
+        filepaths = map(_replace_root, option.filepaths)
+    else:
+        filepaths = option.filepaths
 
-    filepaths = [Path(fp) for fp in option.filepaths if Path(fp).exists()]
+    filepaths = [Path(fp) for fp in filepaths if Path(fp).exists()]
     if not filepaths:
         logger.info("no valid files, exit.")
         sys.exit(1)
