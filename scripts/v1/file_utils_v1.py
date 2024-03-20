@@ -49,14 +49,22 @@ def get_subobsnum(dataset):
 def get_scannum(dataset):
     return max(s for s in dataset.index_table['scannum'])
 
-def get_obs_goal(dataset):
+def get_obs_goal(dataset, verbose=False):
+    if verbose:
+        print(dataset.index_table)
     if dataset[0]['master_name'] != 'tcs':
         return None
     try:
-        bod_tel = dataset[dataset['interface'] == 'lmt'].bod_list[0].open()
+        bod_tel = dataset.index_table[dataset['interface'] == 'lmt']["_bod"][0].open()
+        if verbose:
+            print(bod_tel)
+            print(bod_tel.meta)
         obs_goal = bod_tel.meta['obs_goal']
         return obs_goal
-    except Exception:
+    except Exception as e:
+        if verbose:
+            raise
+
         return None
 
 
@@ -72,7 +80,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--obsnum', default=None, type=int)
     parser.add_argument('--data_lmt_path', '-d', default='/data_lmt')
-    parser.add_argument('print', choices=['apt', 'obsnum', 'scannum'])
+    parser.add_argument('--verbose', action="store_true")
+    parser.add_argument('print', choices=['apt', 'obsnum', 'scannum', "obs_goal"])
 
     option = parser.parse_args()
     data_lmt_path = Path(option.data_lmt_path)
@@ -98,3 +107,6 @@ if __name__ == "__main__":
 
     if option.print == 'scannum':
         _print_and_exit(get_scannum(dataset))
+
+    if option.print == 'obs_goal':
+        _print_and_exit(get_obs_goal(dataset, verbose=option.verbose))
