@@ -1,6 +1,6 @@
 #ObservingScript -Name  "/Users/ma/Codes/toltec/toltec_astro/taco_recipes/observing_scripts/00_toltec_obs/2024-S1/00_toltec_com_startup_2024-S1.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2024-S1-TolTEC-Commissioning
+ProposalInfo Dcs;  Dcs  -ProjectId 2024-S1-TolTEC-COM
 Toltec -PointCorDr[0]  0.0 -PointCorDu[0] 0.0 -PointCorDr[1] 0.0 -PointCorDu[1] 0.0
 ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0

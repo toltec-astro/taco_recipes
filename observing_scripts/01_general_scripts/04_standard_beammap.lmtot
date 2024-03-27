@@ -1,6 +1,6 @@
 #ObservingScript -Name  "00_scripts/01_general_scripts/04_standard_beammap.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2024_TolTEC_Commissioning
+ProposalInfo Dcs;  Dcs  -ProjectId 2024-S1-TolTEC-COM
 ObsGoal Dcs;  Dcs  -ObsGoal BeamMap
 Toltec
 ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
