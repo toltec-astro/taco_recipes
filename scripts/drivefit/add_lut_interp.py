@@ -25,7 +25,7 @@ if __name__ == "__main__":
     tone_amps_lut = _get_tone_amps(tune)
 
     tone_amps_lut[tone_amps_lut <= 0] = np.nan
-    print(tone_amps_lut)
+    # print(tone_amps_lut)
     tone_amps = Table.read(sys.argv[2], names=['amp'], format='ascii.no_header')['amp']
 
     # print(tone_amps)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         # print(f'{i=} {j=} {f=} -> {f_tones[j]}')
         current_tone_amps.append(tone_amps[j])
 
-    print(current_tone_amps)
+    # print(current_tone_amps)
 
     # update
 

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     option = parser.parse_args()
 
     logger.remove()
-    logger.add(sys.stderr, level=option.log_level)
+    logger.add(sys.stdout, level=option.log_level)
 
     logger.debug(f"parsed options: {option}")
 
@@ -94,11 +94,14 @@ if __name__ == "__main__":
         obsnum = meta["obsnum"]
         data_dir = filepath.parent
         for o in range(obsnum, obsnum - 100, -1):
+            pattern = f"toltec{nw}_{o:06d}_*_*targsweep.nc"
             targ_files = list(
                     data_dir.glob(
-                        f"toltec{nw}_{obsnum:06d}_*_*targsweep.nc")
+                        pattern)
                     )
-            print(targ_files)
+            logger.debug(f"glob {data_dir}/{pattern}")
+            if targ_files:
+                logger.debug(f"{targ_files}")
             if len(targ_files) >= 5:
                 dmeta = guess_meta_from_source(targ_files[0])
                 break
