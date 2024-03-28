@@ -110,11 +110,14 @@ if __name__ == "__main__":
         if dmeta is None:
             logger.info("unable to locate drivefit obsnum, abort.")
             sys.exit(1)
-        output = Path(option.output)
-        if output.is_dir():
-            etc_dir = output
+        output = option.output
+        if output is not None:
+            if output.is_dir():
+                etc_dir = output
+            else:
+                etc_dir = output.parent.parent
         else:
-            etc_dir = output.parent.parent
+            etc_dir = Path("/home/toltec/tlaloc/etc/")
         cmd = list(map(str, [
             script_dir.joinpath("reduce_drivefit_commit_local.sh").as_posix(),
             dmeta["obsnum"],

@@ -77,11 +77,16 @@ for i in ${nws[@]}; do
     if [[ $hn =~ "clipy" ]]; then
         if (( i < 7 )) ; then
             reduced=${dataroot}/toltec_clipa/reduced
+            etcprefix=clipa:
         else
             reduced=${dataroot}/toltec_clipo/reduced
+            etcprefix=clipo:
         fi
+        cpprefix="s"
     else
         reduced=${dataroot}/toltec/reduced
+        extprefix=""
+        cpprefix=""
     fi
     echo "use reduced=${reduced}"
     set -x
@@ -93,10 +98,10 @@ for i in ${nws[@]}; do
     cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.lut.txt ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat
     cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.global_adrv.txt ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_atten_drive.dat
 
-    cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat \
-        ${etcdir}/toltec${i}/default_targ_amps.dat
-    cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_atten_drive.dat \
-        ${etcdir}/toltec${i}/atten_drive.dat
+    ${cpprefix}cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat \
+        ${etcprefix}${etcdir}/toltec${i}/default_targ_amps.dat
+    ${cpprefix}cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_atten_drive.dat \
+        ${etcprefix}/${etcdir}/toltec${i}/atten_drive.dat
     echo "~~~~~~~ DriveFit result committed to etcdir=${etcdir} nw=${i}"
 done
 for i in ${nws[@]}; do
