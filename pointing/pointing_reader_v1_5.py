@@ -12,6 +12,8 @@ from astropy.wcs import WCS
 from astropy.nddata.utils import Cutout2D
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+from astropy.convolution import convolve, Gaussian2DKernel
+from astropy.modeling import models, fitting
 
 import glob
 import argparse
@@ -19,6 +21,8 @@ import sys
 import json
 
 if __name__ == '__main__':
+    fwhm_to_sigma = 1./(8.*np.log(2.))**0.5
+
     edge_colors = {'a1100': 'cyan',
                    'a1400': 'yellow',
                    'a2000': 'red'}
@@ -228,7 +232,42 @@ if __name__ == '__main__':
                                      float(ppt_dict["y_t"]["value"]),0)
             
             #im = axi.imshow(img[img.index_of(args.images[ci])].data)
-            im = axi.imshow(cutout.data)
+            gaussian_kernel = Gaussian2DKernel(x_stddev=1.0, y_stddev=1.0)
+            convolved_image = convolve(cutout.data, gaussian_kernel)
+            im = axi.imshow(convolved_image)
+
+            index_flat = np.argmax(convolved_image)
+            peak_index = np.unravel_index(index_flat, convolved_image.shape)
+            row_start, col_start = peak_index
+
+            print(row_start,col_start)
+
+            fit_g = fitting.LevMarLSQFitter()
+
+            x = np.linspace(-convolved_image.shape[1]//2, convolved_image.shape[1]//2, convolved_image.shape[1])
+            y = np.linspace(-convolved_image.shape[0]//2, convolved_image.shape[0]//2, convolved_image.shape[0])
+            
+            row_start = y[row_start]
+            col_start = x[col_start]
+
+            x, y = np.meshgrid(x, y)
+
+            g_init = models.Gaussian2D(amplitude=np.max(convolved_image), x_mean=col_start, y_mean=row_start, x_stddev=5, y_stddev=5)
+
+            g = fit_g(g_init, x, y, convolved_image)
+
+            table['amp'][i] = g.amplitude.value
+            table['x_t'][i] = -g.x_mean.value
+            table['y_t'][i] = g.y_mean.value
+            table['a_fwhm'][i] = g.x_stddev.value/fwhm_to_sigma
+            table['b_fwhm'][i] = g.y_stddev.value/fwhm_to_sigma
+            
+            ppt_dict['amp']['value'] = g.amplitude.value
+            ppt_dict['x_t']['value'] = -g.x_mean.value
+            ppt_dict['y_t']['value'] = g.y_mean.value
+            ppt_dict['a_fwhm']['value'] = g.x_stddev.value/fwhm_to_sigma
+            ppt_dict['b_fwhm']['value'] = g.y_stddev.value/fwhm_to_sigma
+
             
             '''p1 = axi.get_position()
             ax_in = fig.add_axes([0, 0, .3*p1.width, .3*p1.height], projection=wcs)

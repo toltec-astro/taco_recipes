@@ -36,6 +36,7 @@ if __name__ == "__main__":
     # tone_amps[tone_amps < lims[0]] = lims[0]
     # tone_amps[tone_amps > lims[1]] = lims[1]
     tone_amps_norm = np.max(tone_amps)
+    print(f"{tone_amps_norm=}")
     tone_amps_norm_db = -20 * np.log10(tone_amps_norm)
     print(f'norm factor {tone_amps_norm} ({tone_amps_norm_db} db)')
     tone_amps = tone_amps / tone_amps_norm
@@ -56,5 +57,22 @@ if __name__ == "__main__":
         current_tone_amps.append(tone_amps[j])
 
     print(current_tone_amps)
-    # print(tone_amps)
+
+    # update
+
     Table([tone_amps]).write(sys.argv[2].replace('.txt', '.lut.txt'), format='ascii.no_header', overwrite=True)
+    # get adrv
+    with open(sys.argv[2].replace(".txt", ".adrv_ref.txt"), 'r') as fo:
+        adrv_ref = float(fo.read())
+
+    with open(sys.argv[2].replace('.txt', '.global_adrv.txt'), "w") as fo:
+        global_adrv = tone_amps_norm_db + adrv_ref
+        global_adrv = np.ceil(global_adrv * 4) / 4
+        if global_adrv < 0:
+            global_adrv_clip = 0
+        elif global_adrv > 30:
+            global_adrv_clip = 30
+        else:
+            global_adrv_clip = global_adrv
+        print(f"{adrv_ref=} {global_adrv=} {global_adrv_clip=}")
+        fo.write(f"{global_adrv_clip:.2f}")

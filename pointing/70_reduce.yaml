@@ -45,7 +45,7 @@ reduce:
           enabled: false # enable or disable coaddition
         noise_maps: # noise map controls (coadded noise maps if coadd enabled, obs noise maps if disabled)
           enabled: false # enable or disable noise maps
-          n_noise_maps: 1 # number of noise maps (>0).
+          n_noise_maps: 10 # number of noise maps (>0).
           randomize_dets: true # randomize jackknifed noise maps on time chunks and detectors if true. only on time chunks if false.
         interface_sync_offset: # manual timing offsets for each nw/hwpr (in seconds)
           - toltec0: 0
@@ -87,7 +87,7 @@ reduce:
           pixel_size_arcsec: 1.0 # pixel size in arceconds (used for all obs and coadded maps)
           x_size_pix: 0 # manually specify number of map columns (forced to be odd)
           y_size_pix: 0 # manually specify number of map rows (forced to be odd)
-          coverage_cut: 0.0 # coverage cut value for psd, hist, and coverage_bool maps
+          coverage_cut: 0.5 # coverage cut value for psd, hist, and coverage_bool maps
           jinc_filter: # parameters to control jinc filter shape (map_method = jinc required)
             r_max: 3.0 # max radius to apply filter to (max radius = r_max x lambda/diameter)
             shape_params: # a, b (beam-size/3), c
@@ -160,12 +160,12 @@ reduce:
               mask_radius_arcsec: 0.0 # radius of region around the map center to mask during cleaning (only used if >0)
               grouping: [nw] # clean grouping (array, nw, all)
               n_eig_to_cut: # number of eigenvalues to remove (if stddev_limit >0, calc this many eigs, if this is 0, calc all eigs) 
-                a1100: [3]
+                a1100: [5]
                 a1400: [3]
                 a2000: [3]
             weighting: # how to weight data and maps
-              type: approximate # type of TOD weighting (full=use scan variance/approximate=use det sensitivity/const=1)
-              median_weight_factor: 0 # set all weights above this factor x median of unflagged detectors to median (>=1 allowed)
+              type: approximate #full # type of TOD weighting (full=use scan variance/approximate=use det sensitivity/const=1)
+              median_weight_factor: 3 # set all weights above this factor x median of unflagged detectors to median (>=1 allowed)
             flagging: # controls flagging after cleaning
               lower_weight_factor: 0.0 # flag detectors below this weight limit (ignored if 0, weight=1/variance of TOD)
               upper_weight_factor: 0.0 # flag detectors above this weight limit (ignored if 0, weight=1/variance of TOD)

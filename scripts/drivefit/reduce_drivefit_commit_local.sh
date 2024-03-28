@@ -52,6 +52,7 @@ perc=50
 
 echo "DriveFit: commit results obsnum=${obsnum} to obsnum_current=${obsnum_current} perc=${perc}"
 echo "running networks ${nws[@]}"
+echo "use etc dir ${etcdir}"
 
 
 bin=${scriptdir}/get_ampcor_from_adrv.py
@@ -70,28 +71,35 @@ for i in ${nws[@]}; do
     fi
 
     set -x
-    ${pybindir}/python ${bin} -p ${perc} -- ${adrv_file} > ${adrv_log}
-
-    if (( i < 7 )); then
-        reduced=${dataroot}/toltec_clipa/reduced
+    ${pybindir}/python ${bin} -p ${perc} -- ${adrv_file} |tee ${adrv_log}
+    set +x
+    hn=$(hostname)
+    if [[ $hn =~ "clipy" ]]; then
+        if (( i < 7 )) ; then
+            reduced=${dataroot}/toltec_clipa/reduced
+        else
+            reduced=${dataroot}/toltec_clipo/reduced
+        fi
     else
-        reduced=${dataroot}/toltec_clipo/reduced
+        reduced=${dataroot}/toltec/reduced
     fi
+    echo "use reduced=${reduced}"
+    set -x
     ${pybindir}/python ${bin_lut_interp} \
        ${dataroot}/toltec/?cs/toltec${i}/toltec${i}_${obsnum_str}_001*_targsweep.nc \
        ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.txt \
        ${reduced}/toltec${i}_${obsnum_str_current}_*_targfreqs.dat \
 
     cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.lut.txt ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat
-    set +x
-    if (( i <= 6 )); then
-        dest=clipa
-    else
-        dest=clipo
-    fi
-    scp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat clipa:/home/toltec/tlaloc/etc/toltec${i}/
-    echo "~~~~~~~ DriveFit result commited to dest=${dest} nw=${i}"
-done
+    cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_adrv.p${perc}.global_adrv.txt ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_atten_drive.dat
 
-for i in $(seq 0 12); do cat ${scratchdir}/drive_atten_toltec${i}_${obsnum}_adrv.log |grep a_drv_ref ; done
+    cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_default_targ_amps.dat \
+        ${etcdir}/toltec${i}/default_targ_amps.dat
+    cp ${scratchdir}/drive_atten_toltec${i}_${obsnum_str}_atten_drive.dat \
+        ${etcdir}/toltec${i}/atten_drive.dat
+    echo "~~~~~~~ DriveFit result committed to etcdir=${etcdir} nw=${i}"
+done
+for i in ${nws[@]}; do
+    cat ${scratchdir}/drive_atten_toltec${i}_${obsnum}_adrv.log |grep a_drv_ref
+done
 

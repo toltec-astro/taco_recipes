@@ -12,6 +12,7 @@ from astropy.wcs import WCS
 from astropy.nddata.utils import Cutout2D
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+from astropy.convolution import convolve, Gaussian2DKernel
 
 import glob
 import argparse
@@ -228,7 +229,9 @@ if __name__ == '__main__':
                                      float(ppt_dict["y_t"]["value"]),0)
             
             #im = axi.imshow(img[img.index_of(args.images[ci])].data)
-            im = axi.imshow(cutout.data)
+            gaussian_kernel = Gaussian2DKernel(x_stddev=1.0, y_stddev=1.0)
+            convolved_image = convolve(cutout.data, gaussian_kernel)
+            im = axi.imshow(convolved_image)
             
             '''p1 = axi.get_position()
             ax_in = fig.add_axes([0, 0, .3*p1.width, .3*p1.height], projection=wcs)
