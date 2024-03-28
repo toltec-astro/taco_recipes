@@ -43,6 +43,8 @@ def make_ampcor(adrv_file, perc, plot=False, cutoff_max=30., cutoff_min=0):
     outfile = Path(adrv_file).with_suffix(f'.p{perc:.0f}.txt')
     print(f"save to file {outfile}")
     np.savetxt(outfile, ampcors)
+    with open(Path(adrv_file).with_suffix(f'.p{perc:.0f}.adrv_ref.txt'), "w") as fo:
+        fo.write(f"{a_drv_ref}")
     if plot:
         import matplotlib.pyplot as plt
         fig, (ax, bx, cx) = plt.subplots(1, 3, tight_layout=True, figsize=(8, 4))

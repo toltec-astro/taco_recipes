@@ -24,10 +24,11 @@ output_dir=${qldir}
 echo "kids ql reduce for ${filepaths} ${output_dir}"
 
 set -x
+sleep 20
 ${pybindir}/python3 ${scriptdir}/reduce_kids_ql.py ${filepaths} \
     --output_dir ${output_dir} --log_level DEBUG \
     --search_paths ${dataroot}/toltec_clip{a,o}/reduced \
-    --data_lmt_root ${dataroot}
+    --data_lmt_root ${dataroot} > ${scriptdir}/reduce_kids_ql.log
 
 set +x
 
