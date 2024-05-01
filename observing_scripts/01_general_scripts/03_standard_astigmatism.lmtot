@@ -7,7 +7,7 @@ ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort
 TelescopeBackend -IncludeSignal  0
 Tune Cal;  Cal  -CalMode Tune
 ToltecTuneFlag null;  ToltecBackend  -NeedsTune 0
-M1XAstigmatism M1;  M1  -ZernikeCDelta[0] 0 -ZernikeC[0] 0
+M1XAstigmatism M1;  M1  -ZernikeCDelta[0] 0 -ZernikeC[0] -200
 #Sleep -sec  10
 Loop -loop_name  Loop -loop_repeat 7 -loop_when EndOfLoop
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0

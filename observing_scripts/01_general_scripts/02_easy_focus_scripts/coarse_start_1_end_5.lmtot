@@ -3,11 +3,11 @@ Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -
 ProposalInfo Dcs;  Dcs  -ProjectId 2024_Tol_SRO
 ObsGoal Dcs;  Dcs  -ObsGoal Focus
 Toltec
-ToltecBackend -RoachCmd  config -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0
 Tune Cal;  Cal  -CalMode Tune
 ToltecTuneFlag null;  ToltecBackend  -NeedsTune 0
-M2Offsets M2;  M2  -TiltDelta 0 -TiltReq 0.00 -TipDelta 0 -TipReq 0.00 -XDelta 0 -XReq 0.00 -YDelta 0 -YReq 0.00 -ZDelta 0 -ZReq 1.00
+M2OffsetsZ M2;  M2  -ZDelta 0 -ZReq 1.00
 #Sleep -sec  2
 Loop -loop_name  Loop -loop_repeat 9 -loop_when EndOfLoop
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
