@@ -12,6 +12,8 @@ _source ${scriptdir}/../00_shenv.${shenv_name} ${pyenv_name}
 print_env || { echo 'unable to load script env, exit.' ; exit 1; }
 
 ## actual script starts form here
+exec 1>>${logdir}/ql_server.log
+exec 2>&1
 
 ## TODO: pass the paths via command line
-${pybindir}/python3 ${scriptdir}/ql_server.py $@ 
+${pybindir}/python3 ${scriptdir}/ql_server.py $@

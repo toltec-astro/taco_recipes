@@ -5,6 +5,7 @@ scriptdir=$(dirname "$(readlink -f "$0")")
 ## directories
 dataroot=${HOME}/toltec_astro_v2/run/data_lmt
 dataprodroot=${HOME}/toltec_astro_v2/run/dataprod_toltec
+logdir=${HOME}/toltec_astro_v2/run/log
 
 scratchdir=${dataprodroot}/scratch
 if [[ -e ${SCRATCHDIR} ]]; then
@@ -30,6 +31,7 @@ function print_env {
     echo "    scriptdir: ${scriptdir}"
     echo "     dataroot: ${dataroot}"
     echo " dataprodroot: ${dataprodroot}"
+    echo "       logdir: ${logdir}"
     echo "   scratchdir: ${scratchdir}"
     echo "     pybindir: ${pybindir}"
     echo ""

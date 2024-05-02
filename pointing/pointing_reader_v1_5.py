@@ -123,7 +123,7 @@ if __name__ == '__main__':
         pix_scale_arcsec = abs(wcs.wcs.cdelt[0])
         crpix1, crpix2 = wcs.wcs.crpix
         n1,n2,n3,n4 = img[1].data.shape
-        zoom_size_arcsec = 100#min(n3,n4)
+        zoom_size_arcsec = 101#min(n3,n4)
         zoom_size_pix = np.floor(zoom_size_arcsec/pix_scale_arcsec)
         
         # image plotting
@@ -244,9 +244,19 @@ if __name__ == '__main__':
 
             fit_g = fitting.LevMarLSQFitter()
 
-            x = np.linspace(-convolved_image.shape[1]//2, convolved_image.shape[1]//2, convolved_image.shape[1])
-            y = np.linspace(-convolved_image.shape[0]//2, convolved_image.shape[0]//2, convolved_image.shape[0])
+
+            print(convolved_image.shape)
+
+
+            #x = range(-convolved_image.shape[1]//2, convolved_image.shape[1]//2+1)#, convolved_image.shape[1])
+            #y = range(-convolved_image.shape[0]//2, convolved_image.shape[0]//2+1)#, convolved_image.shape[0])
+
+            x = range(-50,51)
+            y = range(-50,51)
             
+
+            print(x,y)
+
             row_start = y[row_start]
             col_start = x[col_start]
 
@@ -257,14 +267,14 @@ if __name__ == '__main__':
             g = fit_g(g_init, x, y, convolved_image)
 
             table['amp'][i] = g.amplitude.value
-            table['x_t'][i] = -g.x_mean.value
-            table['y_t'][i] = g.y_mean.value
+            table['x_t'][i] = -g.x_mean.value - 1
+            table['y_t'][i] = g.y_mean.value + 1
             table['a_fwhm'][i] = g.x_stddev.value/fwhm_to_sigma
             table['b_fwhm'][i] = g.y_stddev.value/fwhm_to_sigma
             
             ppt_dict['amp']['value'] = g.amplitude.value
-            ppt_dict['x_t']['value'] = -g.x_mean.value
-            ppt_dict['y_t']['value'] = g.y_mean.value
+            ppt_dict['x_t']['value'] = -g.x_mean.value - 1
+            ppt_dict['y_t']['value'] = g.y_mean.value + 1
             ppt_dict['a_fwhm']['value'] = g.x_stddev.value/fwhm_to_sigma
             ppt_dict['b_fwhm']['value'] = g.y_stddev.value/fwhm_to_sigma
 
@@ -310,11 +320,18 @@ if __name__ == '__main__':
                                         fontsize=15)
 
 
-            #axi.axvline(center_y,c='w',linestyle='--')
-            #axi.axhline(center_x,c='w',linestyle='--')
+
+            sky = cutout.wcs.all_world2pix(-g.x_mean.value-1, g.y_mean.value+1,0)
+
+            axi.axvline(sky[0],c='w',linestyle='--',alpha=0.5)
+            axi.axhline(sky[1],c='w',linestyle='--',alpha=0.5)
+
+            print(sky)
+
+            sky_in = wcs.all_world2pix(-g.x_mean.value-1,g.y_mean.value+1,0)
             
-            #ax_in.axvline(x,c='w',linestyle='--', linewidth=1, alpha=0.25)
-            #ax_in.axhline(y,c='w',linestyle='--', linewidth=1, alpha=0.25)
+            ax_in.axvline(sky_in[0],c='w',linestyle='--', linewidth=1, alpha=0.25)
+            ax_in.axhline(sky_in[1],c='w',linestyle='--', linewidth=1, alpha=0.25)
             
             lon = axi.coords[0]
             lat = axi.coords[1]
