@@ -2,6 +2,8 @@
 
 from multiprocessing import Pool
 from pathlib import Path
+import shutil
+import sys
 
 import functools
 import astropy.units as u
@@ -215,7 +217,11 @@ def _make_matched_apt_nw(apt_left, apt_right, Qr_at_500MHz=None, debug_plot_kw=N
     else:
         raise ValueError("no Qr info")
     Qr = np.median(Qr)
-    logger.debug(f"match assume {Qr=} for {nw=}")
+    n_left = len(fr_left)
+    n_right = len(fr_right)
+    if n_left < min(n_right * 0.1, 10):
+        return None
+    logger.debug(f"match assume {Qr=} for {nw=} {n_left=} {n_right=}")
     shift, shift_data = _match_tonelists(fr_left, fr_right, Qr_at_500MHz=np.median(Qr))
     logger.debug(f"found {shift=} for {nw=}")
     # apply shift
@@ -517,11 +523,21 @@ if __name__ == '__main__':
     logger = get_logger()
 
     data_rootpath = option.data_rootpath
+    obsnum = option.obsnum
+    tune_obsnum = _get_tune_obsnum(data_rootpath, obsnum)
+
+    apt_out_name = f'apt_{obsnum}_matched.ecsv'
+    apt_out_filepath = option.output_dir.joinpath(apt_out_name)
+    for o in range(tune_obsnum, obsnum):
+        apt_o = option.output_dir.joinpath(f'apt_{o}_matched.ecsv')
+        if apt_o.exists():
+            logger.info(f"use existing matched apt {apt_o}")
+            shutil.copy(apt_o, apt_out_filepath)
+            sys.exit(0)
 
     apt_in = Table.read(option.apt_in_file, format='ascii')
     apt_in.add_column(Column(range(len(apt_in)), name='det_id'), 0)
     obsnum_in = _get_apt_obsnum(apt_in)
-    obsnum = option.obsnum
     logger.debug(f"make apt for {obsnum=} from {obsnum_in=}\n{apt_in}")
     kmp_index = _get_kmp_files(data_rootpath, obsnum)
     if kmp_index is None:
@@ -539,7 +555,5 @@ if __name__ == '__main__':
                 apt_matched[c] = apt_matched[c].filled(-1.)
 
     logger.debug(f"apt_matched:\n{apt_matched}")
-    apt_out_name = f'apt_{obsnum}_matched.ecsv'
-    apt_out_filepath = option.output_dir.joinpath(apt_out_name)
 
     apt_matched.write(apt_out_filepath, format='ascii.ecsv', overwrite=True)

@@ -15,4 +15,4 @@ print_env || { echo 'unable to load script env, exit.' ; exit 1; }
 
 ${pybindir}/python3 ${scriptdir}/dispatch_reduction.py \
     $@  \
-    --data_lmt_path=${dataroot} > ${scriptdir}/dispatch_reduction.log
+    --data_lmt_path=${dataroot} |tee ${logdir}/dispatch_reduction.log

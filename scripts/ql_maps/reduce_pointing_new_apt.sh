@@ -57,7 +57,7 @@ set +e
 
 # run match apt with current obs
 
-apt_in_file=${commondir}/apt_GW_2024_v4.ecsv #apt_GW_v8_with_fg_pg_loc_ori_flipped_flag.ecsv
+apt_in_file=${commondir}/apt_GW_2024_v4.ecsv
 time ${pybindir}/python3 ${scriptdir}/make_matched_apt.py \
     --data_rootpath ${dataroot}\
     --apt_in_file ${apt_in_file} \
@@ -71,7 +71,7 @@ ln -sf ${apt_matched_file} ${rcdir}/data/${apt_filename}
 
 # run tolteca reduce
 time $toltecaexec -d ${rcdir} -g -- reduce --jobkey reduced/${obsnum} \
-    --inputs.0.select "obsnum == ${obsnum} & (scannum == ${scannum}) & (interface != \"toltec7\") & (interface != \"toltec8\") & (interface !=\"toltec10\")" \
+    --inputs.0.select "obsnum == ${obsnum} & (scannum == ${scannum})" \
     --steps.0.path ~/toltec_astro_v2/citlali/build/bin/citlali
 # $toltecaexec -g -d ${rcdir} -- reduce --jobkey reduced/${obsnum} --inputs.0.select "(obsnum == ${obsnum}) & (scannum == ${scannum}) & (interface != \"toltec0\") & (interface != \"toltec6\")"
 # & (interface != \"toltec4\") & (interface != \"toltec6\") " #& (interface != \"toltec2\") & (interface != \"toltec3\") " #& (interface != \"toltec1\") & (interface != \"toltec4\") & (interface != \"toltec6\")"

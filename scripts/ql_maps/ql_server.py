@@ -4,10 +4,12 @@ import dispatch_reduction as dr
 from pathlib import Path
 from json import JSONEncoder
 import yaml
+import math
 
 from tolteca.datamodels.toltec import BasicObsDataset
 from tolteca.datamodels.toltec.data_prod import ToltecDataProd, DataItemKind, ScienceDataProd
 from tollan.utils.log import get_logger, init_log
+from toltecpipe_status import has_run_for_obsnum, get_client
 
 
 DATA_LMT_ROOT = "/home/toltec/toltec_astro_v2/run/data_lmt"
@@ -90,7 +92,7 @@ def get_dp_for_dataset(rootdir, dataset, reduced_dir='toltec/reduced'):
     return dp
 
 
-def _vstack_images(files):
+def _vstack_images_0(files):
     from PIL import Image
     images = [Image.open(file) for file in files if file.name.endswith('.png')]
 
@@ -109,18 +111,61 @@ def _vstack_images(files):
     return new_image
 
 
+def _vstack_images(files):
+    from PIL import Image
+    images = [Image.open(file) for file in files if file.name.endswith('.png')]
+
+    widths, heights = zip(*(i.size for i in images))
+    max_width = max(widths)
+    total_height = 0
+    for image in images:
+        total_height = total_height + image.size[1] * max_width/image.size[0]
+    new_image = Image.new('RGB', (int(max_width), int(total_height)), 'white')
+
+    y_offset = 0
+    for image in images:
+        n_width = int(max_width)
+        n_height = int(math.ceil(image.size[1]*max_width/image.size[0]))
+        new_image.paste(image.resize((n_width, n_height)), (0,y_offset))
+        y_offset += n_height
+    return new_image
+
+
+def _hstack_images(files):
+    from PIL import Image
+    images = [Image.open(file) for file in files if file.name.endswith('.png')]
+
+    total_width = sum(image.size[0] for image in images)
+    max_height = max(image.size[1] for image in images)
+
+    new_image = Image.new('RGBA', (total_width, max_height))
+
+    # Paste each image into the new image vertically
+    x_offset = 0
+    for image in images:
+        new_image.paste(image, (x_offset, 0))
+        x_offset += image.size[0]
+    return new_image
+
+
+
 def get_quicklook_response(ql_files, save_path):
     logger = get_logger()
     logger.debug(f"make summary for ql_files={ql_files}")
-    summary_image_path = Path(save_path).joinpath('lmt_tcs_quicklook_summary.png')
+    summary_image_path_v = Path(save_path).joinpath('lmt_tcs_quicklook_summary_v.png')
+    summary_image_path_h = Path(save_path).joinpath('lmt_tcs_quicklook_summary_h.png')
     if ql_files:
-        summary_image = _vstack_images(ql_files)
+        summary_image_v = _vstack_images(ql_files)
+        summary_image_h = _hstack_images(ql_files)
         # if not summary_image_path.exists():
-        summary_image.save(summary_image_path)
+        summary_image_v.save(summary_image_path_v)
+        summary_image_h.save(summary_image_path_h)
     return {
             "lmt_tcs": {
                 "quicklook": {
-                    "summary_image": summary_image_path.as_posix(),
+                    "summary_image": summary_image_path_v.as_posix(),
+                    "summary_image_v": summary_image_path_v.as_posix(),
+                    "summary_image_h": summary_image_path_h.as_posix(),
                     }
                 }
             }
@@ -280,15 +325,18 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     }
         # print(bods)
         ql_data, message = get_quicklook_data(dp_root, bods, search_paths=QL_SEARCH_PATHS)
+        has_run = has_run_for_obsnum(get_client(), obsnum)
+        print(f"{obsnum=} {has_run=}")
         if ql_data is None:
+            # check if there is run for this obsnum
             return {
-                    'exit_code': -1,
-                    'message': message
+                    'exit_code': 1 if has_run else -1,
+                    'message': "reduction is running" if has_run else message
                     }
         return {
-                'exit_code': 0,
+                'exit_code': 1 if has_run else 0,
                 'data': ql_data,
-                'message': message,
+                'message': "reduction is running" if has_run else message,
                 }
 
 
@@ -303,7 +351,13 @@ def run_server():
 
 if __name__ == "__main__":
     import sys
-    init_log(level='DEBUG')
+    init_log(level='DEBUG', loggers={
+            'gql': {
+                'handlers': ['default'],
+                'level': 'WARNING',
+                'propagate': False
+                },
+        }, colored=False)
 
     if len(sys.argv) > 1:
         resp = MyTCPHandler.handle_obsnum(int(sys.argv[1]))
