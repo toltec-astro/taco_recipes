@@ -1,0 +1,11 @@
+kids:
+  sweep_check: {}
+  sweep_check_plot:
+    show: False
+  kids_find: {}
+  kids_find_plot:
+    show: False
+  tlaloc_output:
+    enabled: False
+
+

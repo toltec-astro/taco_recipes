@@ -2,10 +2,14 @@
 
 scriptdir=$(dirname "$(readlink -f "$0")")
 
+if [[ ! -e ${toltec_astro_repo_root} ]]; then
+    toltec_astro_repo_root=${HOME}/toltec_astro_v2
+fi
+
 ## directories
-dataroot=${HOME}/toltec_astro_v2/run/data_lmt
-dataprodroot=${HOME}/toltec_astro_v2/run/dataprod_toltec
-logdir=${HOME}/toltec_astro_v2/run/log
+dataroot=${toltec_astro_repo_root}/run/data_lmt
+dataprodroot=${toltec_astro_repo_root}/run/dataprod_toltec
+logdir=${toltec_astro_repo_root}/run/log
 
 scratchdir=${dataprodroot}/scratch
 if [[ -e ${SCRATCHDIR} ]]; then
@@ -28,6 +32,7 @@ toltecaexec=${pybindir}/tolteca
 
 function print_env {
     echo "loaded tolteca env:"
+    echo "     reporoot: ${toltec_astro_repo_root}"
     echo "    scriptdir: ${scriptdir}"
     echo "     dataroot: ${dataroot}"
     echo " dataprodroot: ${dataprodroot}"
