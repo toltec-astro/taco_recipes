@@ -1,14 +1,10 @@
-- enable_if: roach==0
+- enable_if: roach>=7
   source:
-    kids: {}
-
-- enable_if: roach==1
-  source:
-    kids: {}
-
-- enable_if: roach==2
-  source:
-    kids: {}
+    kids:
+      kids_find:
+        d21_snr_min: 10
+        snr_min: 5
+        peak_db_min: 0.1
 
 - enable_if: file_suffix=="vnasweep"
   source:
