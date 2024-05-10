@@ -2,7 +2,7 @@ import sys
 import pty
 from tollan.utils.log import logger
 from tollan.utils.fmt import pformat_yaml
-from tolteca_datamodels.toltec.file import guess_meta_from_source
+from tolteca_datamodels.toltec.file import guess_info_from_source
 from pathlib import Path
 
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
             filepath = (_filepath.parent / filepath).resolve()
     logger.info(f"resolved link: {filepath}")
 
-    meta = guess_meta_from_source(filepath)
+    meta = guess_info_from_source(filepath)
 
     logger.debug(f"{filepath=}\n{pformat_yaml(meta)}")
 
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     if action == 'drivefit_reduce':
         cmd = list(map(str, [
             script_dir.joinpath("reduce_drivefit.sh").as_posix(),
-            meta["obsnum"],
-            meta["roach"],
+            meta.obsnum,
+            meta.roach,
             ]))
         logger.info("run {}".format(" ".join(cmd)))
         returncode = pty.spawn(cmd)
@@ -90,8 +90,8 @@ if __name__ == "__main__":
 
     if action == 'drivefit_commit':
         # find drive fit obsnum
-        nw = meta["roach"]
-        obsnum = meta["obsnum"]
+        nw = meta.roach
+        obsnum = meta.obsnum
         data_dir = filepath.parent
         for o in range(obsnum, obsnum - 100, -1):
             pattern = f"toltec{nw}_{o:06d}_*_*targsweep.nc"
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             if targ_files:
                 logger.debug(f"{targ_files}")
             if len(targ_files) >= 5:
-                dmeta = guess_meta_from_source(targ_files[0])
+                dmeta = guess_info_from_source(targ_files[0])
                 break
         else:
             dmeta = None
@@ -120,9 +120,9 @@ if __name__ == "__main__":
             etc_dir = Path("/home/toltec/tlaloc/etc/")
         cmd = list(map(str, [
             script_dir.joinpath("reduce_drivefit_commit_local.sh").as_posix(),
-            dmeta["obsnum"],
-            meta["obsnum"],
-            meta["roach"],
+            dmeta.obsnum,
+            meta.obsnum,
+            meta.roach,
             etc_dir
             ]))
         logger.info("run {}".format(" ".join(cmd)))
