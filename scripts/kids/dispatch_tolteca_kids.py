@@ -1,25 +1,16 @@
-import functools
 import itertools
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
-from astropy.table import Column, Table
+from astropy.table import Column
 from tollan.utils.fmt import pformat_yaml
-from tollan.utils.log import logger, logit, timeit
+from tollan.utils.log import logger, timeit
 from tolteca_config.core import RuntimeContext
-from tolteca_datamodels.toltec.file import guess_meta_from_source
+from tolteca_datamodels.toltec.file import guess_info_from_source
 from tolteca_datamodels.toltec.types import ToltecDataKind
 from tolteca_datamodels.toltec.ncfile import NcFileIO
 from tolteca_kids.core import Kids
-
-
-@functools.lru_cache(maxsize=256)
-def _get_meta(filepath):
-    meta = guess_meta_from_source(filepath)
-    logger.info(f"{filepath}\n{pformat_yaml({'meta': meta})}")
-    return meta
 
 
 def _sort_targ_out_fft(swp, targ_out):
@@ -40,20 +31,22 @@ def _sort_targ_out_fft(swp, targ_out):
 
 
 @timeit
-def run_tolteca_kids_sweep(rc, filepath):
-    kids = Kids(rc)
-    logger.debug(f"kids config:\n{kids.config.model_dump_yaml()}")
+def reduce_sweep_tolteca_kids(rc: RuntimeContext, filepath):
     with timeit("load kids data"):
         swp = NcFileIO(filepath).read()
-    # first run the checker to report any issues
-    try:
-        kids.pipeline(swp)
-    except Exception:
-        logger.opt(exception=True).error("failed to run tolteca kids:")
-        returncode = -1
-    else:
-        returncode = 0
-    return locals()
+
+    context_vars = ["roach", "file_suffix"]
+    with rc.config_backend.set_context({k: swp.meta[k] for k in context_vars}):
+        kids = Kids(rc)
+        logger.debug(f"kids config:\n{kids.config.model_dump_yaml()}")
+        try:
+            kids.pipeline(swp)
+        except Exception:
+            logger.opt(exception=True).error("failed to run tolteca kids:")
+            returncode = -1
+        else:
+            returncode = 0
+        return locals()
 
 
 if __name__ == "__main__":
@@ -68,11 +61,14 @@ if __name__ == "__main__":
     input_ = option.input
 
     data_lmt_root = Path(option.data_lmt_root)
-    if re.match(r".*/toltec.+\.nc", input_):
+    if re.match(r"^(.*/)?toltec.+\.nc", input_):
         filepath = input_
     elif re.match(r"\d+-\d+-\d+-\d+", input_):
-        obsnum, subobsnum, scannum, nw = map(int, input_.split("-"))
-        p = f"toltec{nw}/toltec{nw}_{obsnum:06d}" f"_{subobsnum:03d}_{scannum:04d}_*.nc"
+        obsnum, subobsnum, scannum, roach = map(int, input_.split("-"))
+        p = (
+            f"toltec{roach}/toltec{roach}_{obsnum:06d}"
+            f"_{subobsnum:03d}_{scannum:04d}_*.nc"
+        )
         glob_patterns = [
             f"toltec/ics/{p}",
             f"toltec/tcs/{p}",
@@ -88,14 +84,18 @@ if __name__ == "__main__":
     rc = RuntimeContext(option.config)
 
     from tollan.utils.cli import dict_from_cli_args
+
     rc.config_backend.update_override_config(dict_from_cli_args(unparsed_args))
     logger.info(f"{pformat_yaml(rc.config.model_dump())}")
 
-    meta = _get_meta(filepath)
-    # dispath by data kind
-    data_kind = meta['data_kind'] 
-    if (data_kind & ToltecDataKind.RawSweep):
-        run_tolteca_kids_sweep(rc, filepath)
+    source_info = guess_info_from_source(filepath)
+    # dispatch by data kind
+    data_kind = source_info.data_kind
+    if source_info.data_kind & ToltecDataKind.RawSweep:
+        ctx = reduce_sweep_tolteca_kids(rc, filepath)
+        if ctx["returncode"] < 0:
+            logger.error("Job's failed.")
+        else:
+            logger.info("Job's done!")
     else:
         logger.debug(f"no-op for {data_kind=}")
-    logger.info("Job's done!")

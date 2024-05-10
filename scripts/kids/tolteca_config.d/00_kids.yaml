@@ -1,11 +1,12 @@
 kids:
   sweep_check: {}
   sweep_check_plot:
+    enabled: False
     show: False
   kids_find: {}
   kids_find_plot:
+    enabled: False
     show: False
   tlaloc_output:
     enabled: False
-
-
+  output: {}

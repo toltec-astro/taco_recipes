@@ -9,6 +9,7 @@ fi
 ## directories
 dataroot=${toltec_astro_repo_root}/run/data_lmt
 dataprodroot=${toltec_astro_repo_root}/run/dataprod_toltec
+tlalocetcdir=${toltec_astro_repo_root}/run/tlaloc_etc
 logdir=${toltec_astro_repo_root}/run/log
 
 scratchdir=${dataprodroot}/scratch
@@ -36,6 +37,7 @@ function print_env {
     echo "    scriptdir: ${scriptdir}"
     echo "     dataroot: ${dataroot}"
     echo " dataprodroot: ${dataprodroot}"
+    echo " tlalocetcdir: ${tlalocetcdir}"
     echo "       logdir: ${logdir}"
     echo "   scratchdir: ${scratchdir}"
     echo "     pybindir: ${pybindir}"

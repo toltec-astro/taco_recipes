@@ -24,12 +24,5 @@ for file in ${dataroot}/toltec/{ics,tcs}/toltec*/toltec*_${obsnum_str}_*_{vnaswe
         echo "file does not exist: ${file}"
 	continue
     fi
-    echo "processing ${file}"
-    set -x
-    ${pybindir}/python3 dispatch_tolteca_kids.py ${file} \
-            --data_lmt_root ${dataroot} \
-            --config ${scriptdir}/tolteca.yaml \
-	    --kids.sweep_check_plot.save_rootpath ${scratchdir} \
-	    --kids.kids_find_plot.save_rootpath ${scratchdir} 
-    set +x
+    bash ${scriptdir}/dispatch_tolteca_kids.sh ${file}
 done
