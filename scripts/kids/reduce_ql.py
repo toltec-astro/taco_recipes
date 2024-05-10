@@ -275,18 +275,23 @@ def _plot_finding_ratio_nw(
         logger.debug(f"skip plot: [tlt, apt, tct]: {msg}")
         return
     n_found = len(tlt)
-    # import pdb
-    # pdb.set_trace()
-    # assert np.allclose(tct['f_in'], kct['f_in'])
 
     if kct is not None:
         r_med = np.median(0.5 / kct["Qr"])
     else:
         r_med = np.median(0.5 / tlt["Qr"])
 
-    x_off = (tct["dist"] / tct["f_chan"]).to_value(u.dimensionless_unscaled)
-    # phi_off = tct["d_phi"]
-    phi_off = (np.arctan2(x_off, r_med) << u.rad).to(u.deg)
+    x_off = (tlt["dist"] / tlt["f_chan"]).to_value(u.dimensionless_unscaled)
+    # phi_off = tlt["d_phi"]
+
+    if len(tct) == 1000:
+        # vna sweep
+        phi_off = np.full((len(tlt),), 0.0) << u.deg
+        m_miss = np.zeros((len(tlt),), dtype=bool)
+    else:
+        phi_off = (np.arctan2(x_off, r_med) << u.rad).to(u.deg)
+        m_miss = np.abs(tlt["dist"]) > (88 << u.kHz)
+    n_miss = np.sum(m_miss)
     # print(phi_off)
     m_good = np.abs(phi_off) < phi_lim
     n_good = np.sum(m_good)
@@ -296,10 +301,8 @@ def _plot_finding_ratio_nw(
     m_ok = np.abs(phi_off) < phi_lim2
     n_ok = np.sum(m_ok)
 
-    m_miss = np.abs(tct["dist"]) > (88 << u.kHz)
-    n_miss = np.sum(m_miss)
 
-    m_single = (tct["bitmask_det"] & SegmentBitMask.blended) == 0
+    m_single = (tlt["bitmask_det"] & SegmentBitMask.blended) == 0
     n_single = np.sum(m_single & (~m_miss))
     m_dup = ~m_single
     n_dup = np.sum(m_dup & (~m_miss))
