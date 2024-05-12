@@ -30,6 +30,8 @@ echo "use pyenv ${pyenv_name}"
 pybindir="${python_venv_root}/${pyenv_name}/bin"
 toltecaexec=${pybindir}/tolteca
 
+# caller info
+callerpath=$(readlink -f "${BASH_SOURCE[1]}")
 
 function print_env {
     echo "loaded tolteca env:"
@@ -41,5 +43,14 @@ function print_env {
     echo "       logdir: ${logdir}"
     echo "   scratchdir: ${scratchdir}"
     echo "     pybindir: ${pybindir}"
+    echo "   callerpath: ${callerpath}"
     echo ""
+}
+function dispatch_py {
+    callerdir=$(dirname ${callerpath})
+    callername=$(basename ${callerpath})
+    pyfile=${callerdir}/${callername%.*}.py
+    set -x
+    ${pybindir}/python3 ${pyfile} $@
+    set +x
 }
