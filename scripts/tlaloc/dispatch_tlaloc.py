@@ -22,12 +22,14 @@ def _ensure_source_info(data):
 kids_script_dir = taco_recipe_script_dir.joinpath("kids")
 
 
-def run_tolteca_kids(data):
+def run_tolteca_kids(data, log_level="INFO"):
     source_info = _ensure_source_info(data)
     cmd = [
         "bash",
         kids_script_dir.joinpath("dispatch_tolteca_kids.sh"),
         source_info.filepath,
+        "--log_level",
+        log_level,
     ]
     return pty_run(cmd)
 
@@ -101,16 +103,16 @@ class TlalocAction:
     actions: ClassVar[list[TlalocActionType]] = list(get_args(TlalocActionType))
 
     @classmethod
-    def vna_reduce(cls, data, **kwargs):
-        return run_tolteca_kids(data)
+    def vna_reduce(cls, data, log_level, **kwargs):
+        return run_tolteca_kids(data, log_level=log_level)
 
     @classmethod
-    def targ_reduce(cls, data, **kwargs):
-        return run_tolteca_kids(data)
+    def targ_reduce(cls, data, log_level, **kwargs):
+        return run_tolteca_kids(data, log_level=log_level)
 
     @classmethod
-    def timestream_reduce(cls, data, **kwargs):
-        return run_tolteca_kids(data)
+    def timestream_reduce(cls, data, log_level, **kwargs):
+        return run_tolteca_kids(data, log_level=log_level)
 
     @classmethod
     def drivefit_reduce(cls, data, **kwargs):
@@ -194,4 +196,11 @@ if __name__ == "__main__":
     logger.debug(
         f"resolved info for {filepath=}\n{pformat_yaml(source_info.model_dump())}"
     )
-    sys.exit(TlalocAction.run(option.action, data=source_info, etc_dir=etc_dir))
+    sys.exit(
+        TlalocAction.run(
+            option.action,
+            data=source_info,
+            etc_dir=etc_dir,
+            log_level=option.log_level,
+        )
+    )
