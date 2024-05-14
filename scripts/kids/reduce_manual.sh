@@ -18,11 +18,12 @@ if [[ ! $1 ]]; then
     exit 1
 fi
 obsnum=$1
+shift
 obsnum_str=$(printf "%06d" ${obsnum})
 for file in ${dataroot}/toltec/{ics,tcs}/toltec*/toltec*_${obsnum_str}_*_{vnasweep,targsweep,tune}.nc; do
     if [[ ! -f ${file} ]]; then
         echo "file does not exist: ${file}"
 	continue
     fi
-    bash ${scriptdir}/dispatch_tolteca_kids.sh ${file}
+    bash ${scriptdir}/dispatch_tolteca_kids.sh ${file} "$@"
 done

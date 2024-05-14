@@ -29,6 +29,6 @@ ${pybindir}/python3 ${scriptdir}/reduce_ql.py ${filepaths} \
     --search_paths \
     ${dataroot}/toltec/reduced \
     ${dataroot}/toltec_clip{a,o}/reduced \
-    --data_lmt_root ${dataroot} > ${logdir}/reduce_kids_ql.log
+    --data_lmt_path ${dataroot} > ${logdir}/reduce_kids_ql.log
 set +x
 

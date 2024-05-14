@@ -301,7 +301,6 @@ def _plot_finding_ratio_nw(
     m_ok = np.abs(phi_off) < phi_lim2
     n_ok = np.sum(m_ok)
 
-
     m_single = (tlt["bitmask_det"] & SegmentBitMask.blended) == 0
     n_single = np.sum(m_single & (~m_miss))
     m_dup = ~m_single
@@ -592,7 +591,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--apt_design",
     )
-    parser.add_argument("--data_lmt_root", default=None)
+    parser.add_argument("--data_lmt_path", default=None)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--log_level", default="INFO")
     parser.add_argument(
@@ -605,9 +604,9 @@ if __name__ == "__main__":
     logger.remove()
     logger.add(sys.stdout, level=option.log_level)
 
-    if option.data_lmt_root is not None:
+    if option.data_lmt_path is not None:
         # replace the root directory
-        data_lmt_root = Path(option.data_lmt_root)
+        data_lmt_path = Path(option.data_lmt_path)
 
         def _replace_root(p):
             p = Path(p)
@@ -617,13 +616,13 @@ if __name__ == "__main__":
                     break
             else:
                 return p
-            return data_lmt_root.joinpath(subpath)
+            return data_lmt_path.joinpath(subpath)
 
         filepaths = map(_replace_root, option.filepaths)
     else:
         filepaths = option.filepaths
 
-    filepaths = [Path(fp) for fp in option.filepaths if Path(fp).exists()]
+    filepaths = [Path(fp) for fp in filepaths if Path(fp).exists()]
     if not filepaths:
         logger.error("no valid files, exit.")
         sys.exit(1)
