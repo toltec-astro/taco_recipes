@@ -28,8 +28,8 @@ fi
 echo "processing ${file}"
 set -x
 ${pybindir}/python3 ${scriptdir}/dispatch_tolteca_kids.py ${file} \
-        --data_lmt_root ${dataroot} \
-        --config ${scriptdir}/tolteca_config.d \
+    --data_lmt_path ${dataroot} \
+    --config ${scriptdir}/tolteca_config.d \
     --kids.sweep_check_plot.save_rootpath ${scratchdir} \
     --kids.kids_find_plot.save_rootpath ${scratchdir}  \
     --kids.output.subdir_fmt null \

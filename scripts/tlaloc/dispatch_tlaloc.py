@@ -1,9 +1,8 @@
-import pty
 import sys
 from pathlib import Path
-from typing import Literal, get_args, ClassVar, Callable
+from typing import Literal, get_args, ClassVar
 
-from tollan.utils.general import resolve_symlink, ensure_abspath
+from tollan.utils.general import ensure_abspath
 from tollan.utils.fmt import pformat_yaml
 from tollan.utils.log import logger, reset_logger, timeit
 from tollan.utils.sys import pty_run
@@ -20,10 +19,17 @@ def _ensure_source_info(data):
     return guess_info_from_source(data)
 
 
+kids_script_dir = taco_recipe_script_dir.joinpath("kids")
+
+
 def run_tolteca_kids(data):
     source_info = _ensure_source_info(data)
-    path = source_info.filepath
-    return 0
+    cmd = [
+        "bash",
+        kids_script_dir.joinpath("dispatch_tolteca_kids.sh"),
+        source_info.filepath,
+    ]
+    return pty_run(cmd)
 
 
 drivefit_script_dir = taco_recipe_script_dir.joinpath("drivefit")
@@ -32,6 +38,7 @@ drivefit_script_dir = taco_recipe_script_dir.joinpath("drivefit")
 def run_drivefit(data):
     source_info = _ensure_source_info(data)
     cmd = [
+        "bash",
         drivefit_script_dir.joinpath("reduce_drivefit.sh"),
         source_info.obsnum,
         source_info.roach,
@@ -67,6 +74,7 @@ def run_drivefit_commit(data, etc_dir="~/tlaloc/etc"):
         return 1
     etc_dir = ensure_abspath(etc_dir)
     cmd = [
+        "bash",
         drivefit_script_dir.joinpath("reduce_drivefit_commit_local.sh"),
         source_info_drivefit.obsnum,
         source_info.obsnum,
