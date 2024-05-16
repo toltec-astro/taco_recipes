@@ -1,59 +1,61 @@
 import sys
 from pathlib import Path
 from typing import Literal, get_args, ClassVar
+import numpy as np
 
 from tollan.utils.general import ensure_abspath
 from tollan.utils.log import logger, reset_logger, timeit
 from tollan.utils.sys import pty_run
-from tolteca_datamodels.toltec.file import guess_info_from_source, SourceInfoModel
+from tolteca_datamodels.toltec.file import guess_info_from_source
 from toltec_file_utils import LmtToltecPathOption
 
 
 taco_recipe_script_dir = Path(__file__).parent.parent
 
 
-def _ensure_source_info(data):
-    if isinstance(data, SourceInfoModel):
-        return data
-    return guess_info_from_source(data)
-
-
 kids_script_dir = taco_recipe_script_dir.joinpath("kids")
 
 
-def run_tolteca_kids(data, log_level="INFO", dp_dir="/data_lmt/toltec/reduced"):
-    source_info = _ensure_source_info(data)
-    dp_dir = dp_dir
-    cmd = [
-        "bash",
-        kids_script_dir.joinpath("dispatch_tolteca_kids.sh"),
-        source_info.filepath,
-        "--log_level",
-        log_level,
-        "--kids.output.path",
-        dp_dir,
-        "--kids.output.subdir_fmt",
-        "null",
-    ]
-    return pty_run(cmd)
+def run_tolteca_kids(tbl, log_level="INFO", dp_dir="/data_lmt/toltec/reduced"):
+    returncodes = []
+    for source_info in tbl.toltec_file.to_info_list():
+        cmd = [
+            "bash",
+            kids_script_dir.joinpath("dispatch_tolteca_kids.sh"),
+            source_info.filepath,
+            "--log_level",
+            log_level,
+            "--kids.output.path",
+            dp_dir,
+            "--kids.output.subdir_fmt",
+            "null",
+        ]
+        returncodes.append(pty_run(cmd))
+    return np.sum(returncodes)
 
 
 drivefit_script_dir = taco_recipe_script_dir.joinpath("drivefit")
 
 
-def run_drivefit(data):
-    source_info = _ensure_source_info(data)
-    cmd = [
-        "bash",
-        drivefit_script_dir.joinpath("reduce_drivefit.sh"),
-        source_info.obsnum,
-        source_info.roach,
-    ]
-    return pty_run(cmd)
+def run_drivefit(tbl):
+    returncodes = []
+    for source_info in tbl.toltec_file.to_info_list():
+        cmd = [
+            "bash",
+            drivefit_script_dir.joinpath("reduce_drivefit.sh"),
+            source_info.obsnum,
+            source_info.roach,
+        ]
+        returncodes.append(pty_run(cmd))
+    return np.sum(returncodes)
 
 
-def run_drivefit_commit(data, etc_dir="~/tlaloc/etc"):
-    source_info = _ensure_source_info(data)
+def run_drivefit_commit(tbl, etc_dir="~/tlaloc/etc"):
+    if len(tbl) > 1:
+        logger.error("drivefit commit for multiple files is not implemented yet.")
+        return 1
+    # TODO: properly handle the multiple file case
+    source_info = tbl.to_info_list()[0]
     path = source_info.filepath
     # find drive fit obsnum by going back for
     nw = source_info.roach
@@ -107,46 +109,46 @@ class TlalocAction:
     actions: ClassVar[list[TlalocActionType]] = list(get_args(TlalocActionType))
 
     @classmethod
-    def vna_reduce(cls, data, log_level, dp_dir, **kwargs):
+    def vna_reduce(cls, tbl, log_level, dp_dir, **kwargs):
         return run_tolteca_kids(
-            data,
+            tbl,
             log_level=log_level,
             dp_dir=dp_dir,
         )
 
     @classmethod
-    def targ_reduce(cls, data, log_level, dp_dir, **kwargs):
+    def targ_reduce(cls, tbl, log_level, dp_dir, **kwargs):
         return run_tolteca_kids(
-            data,
+            tbl,
             log_level=log_level,
             dp_dir=dp_dir,
         )
 
     @classmethod
-    def timestream_reduce(cls, data, log_level, dp_dir, **kwargs):
+    def timestream_reduce(cls, tbl, log_level, dp_dir, **kwargs):
         return run_tolteca_kids(
-            data,
+            tbl,
             log_level=log_level,
             dp_dir=dp_dir,
         )
 
     @classmethod
-    def drivefit_reduce(cls, data, **kwargs):
-        return run_drivefit(data)
+    def drivefit_reduce(cls, tbl, **kwargs):
+        return run_drivefit(tbl)
 
     @classmethod
-    def drivefit_commit(cls, data, etc_dir, **kwargs):
-        return run_drivefit_commit(data, etc_dir=etc_dir)
+    def drivefit_commit(cls, tbl, etc_dir, **kwargs):
+        return run_drivefit_commit(tbl, etc_dir=etc_dir)
 
     @classmethod
-    def dry_run(cls, data, **kwargs):
-        logger.info(f"DRY RUN: {data=} {kwargs=}")
+    def dry_run(cls, tbl, **kwargs):
+        logger.info(f"DRY RUN:\n{tbl}\n{kwargs=}")
         return 0
 
     @classmethod
-    def run(cls, action, data, **kwargs) -> int:
+    def run(cls, action, tbl, **kwargs) -> int:
         with timeit(f"run tlaloc {action=}", level="INFO"):
-            return getattr(cls, action)(data, **kwargs)
+            return getattr(cls, action)(tbl, **kwargs)
 
 
 if __name__ == "__main__":
@@ -207,13 +209,11 @@ if __name__ == "__main__":
     path_option = LmtToltecPathOption(option, tlaloc_etc_path=etc_dir)
     tbl = path_option.get_raw_obs_info_table(
         raise_on_empty=True,
-        raise_on_multiple=True,
     )
-    source_info = tbl.toltec_file.to_info_list()[0]
     sys.exit(
         TlalocAction.run(
             option.action,
-            data=source_info,
+            tbl=tbl,
             etc_dir=etc_dir,
             log_level=option.log_level,
             dp_dir=path_option.lmt_fs.path.joinpath("toltec/reduced"),
