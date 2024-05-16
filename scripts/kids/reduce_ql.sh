@@ -16,19 +16,18 @@ print_env || { echo 'unable to load script env, exit.' ; exit 1; }
 qldir=${dataprodroot}/ql
 
 if [[ ! $1 ]]; then
-    echo "Usage: $0 filepaths"
+    echo "Usage: $0 obs_spec [obs_spec ...]"
 fi
-filepaths="$@"
+obs_specs="$@"
 output_dir=${qldir}
 
-echo "kids ql reduce for ${filepaths} ${output_dir}"
-
-set -x
-${pybindir}/python3 ${scriptdir}/reduce_ql.py ${filepaths} \
+echo "run kids ql reduce for ${obs_specs}"
+echo "output_dir: ${output_dir}"
+dispatch_py ${obs_specs} \
     --output_dir ${output_dir} --log_level DEBUG \
     --search_paths \
+    ${scratchdir} \
     ${dataroot}/toltec/reduced \
     ${dataroot}/toltec_clip{a,o}/reduced \
     --data_lmt_path ${dataroot} > ${logdir}/reduce_kids_ql.log
-set +x
 

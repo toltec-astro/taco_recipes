@@ -1,5 +1,8 @@
+from __future__ import annotations
 from pathlib import Path
 from tolteca_datamodels.lmt.filestore import LmtFileStore
+from tolteca_datamodels.toltec.filestore import ToltecFileStore
+import pandas as pd
 import itertools
 from tollan.utils.log import logger
 import re
@@ -48,8 +51,16 @@ source_info_fields = list(SourceInfoModel.model_fields.keys())
 #
 
 
-def get_lmt_info_tbl_from_toltec_info(lmt_fs: LmtFileStore, info: SourceInfoModel):
+def get_lmt_info_table_from_toltec_info(
+    lmt_fs: LmtFileStore,
+    info: SourceInfoModel,
+    query=None,
+) -> SourceInfoDataFrame:
+    """Return LMT data files for toltec info."""
     master = info.filepath.parent.parent.name
+    if master not in ToltecFileStore.masters:
+        logger.error(f"unable to infer toltec master from {info=}")
+        return None
     logger.debug(f"inferred {master=} for {info=}")
     if master != "tcs":
         logger.error(f"no tel file for {master=} {info=}")
@@ -60,7 +71,9 @@ def get_lmt_info_tbl_from_toltec_info(lmt_fs: LmtFileStore, info: SourceInfoMode
         logger.error(f"no tel file found for {glob_pattern=}")
         return None
     tbl = guess_info_from_sources(files)
-    logger.debug(f"resolved info table:\n{tbl}")
+    logger.debug(f"resolved lmt info table:\n{tbl.toltec_file.pformat()}")
+    if query is not None:
+        return tbl.query(query)
     return tbl
 
 
@@ -74,16 +87,19 @@ def get_obs_goal(lmt_fs, info: SourceInfoModel):
     if lmt_fs is None:
         logger.error("no valid data_lmt path.")
         return None
-    tel_info_tbl: SourceInfoDataFrame = get_lmt_info_tbl_from_toltec_info(lmt_fs, info)
+    tel_info_tbl = get_lmt_info_table_from_toltec_info(
+        lmt_fs, info, query="interface == 'tel_toltec'"
+    )
     if len(tel_info_tbl) == 0:
         logger.error("no tel data found.")
         return None
     if len(tel_info_tbl) > 1:
-        logger.error("ambiguous tel data.")
-    tel_info = tel_info_tbl.toltec_file.to_list()[0]
+        raise ValueError("ambiguous tel data found.")
+    tel_info = tel_info_tbl.toltec_file.to_info_list()[0]
     tel_filepath = tel_info.source.path
     tel_nc = netCDF4.Dataset(tel_filepath)
     obs_goal = ncstr(tel_nc.variables["Header.Dcs.ObsGoal"]).lower()
+    tel_nc.close()
     return obs_goal
 
 
@@ -99,10 +115,14 @@ class LmtToltecPathOption:
         self._toltec_fs = toltec_fs
         self._dp_path = self._get_dataprod_file_store(option)
         self._tlaloc_etc_path = self._get_tlaloc_etc_file_store(option)
+        self._obs_spec = option.obs_spec
 
     @classmethod
     def add_args_to_parser(
-        cls, parser: argparse.ArgumentParser, defaults=None, obs_spec_required=False
+        cls,
+        parser: argparse.ArgumentParser,
+        defaults=None,
+        obs_spec_required=False,
     ):
         defaults = defaults or {}
         parser.add_argument(
@@ -156,6 +176,11 @@ class LmtToltecPathOption:
         """The tlaloc etc file store."""
         return self._tlaloc_etc_path
 
+    @property
+    def obs_spec(self):
+        """The obs spec."""
+        return self._obs_spec
+
     @classmethod
     def _get_lmt_toltec_file_store(cls, option):
         data_lmt_path = option.data_lmt_path
@@ -176,19 +201,65 @@ class LmtToltecPathOption:
     @classmethod
     def _get_dataprod_file_store(cls, option):
         # TODO: add DataProdFileStore handling
-        return option.dataprod_path
+        return getattr(option, "dataprod_path", None)
 
     @classmethod
     def _get_tlaloc_etc_file_store(cls, option):
         # TODO: add tlaloc etc file store handling
-        return option.tlaloc_etc_path
+        return getattr(option, "tlaloc_etc_path", None)
 
-    def get_raw_obs_files(self, unique=False):
-        option = self._option
-        obs_spec = option.obs_spec
+    def get_raw_obs_info_table(
+        self,
+        raise_on_multiple=False,
+        raise_on_empty=False,
+    ):
+        obs_spec = self.obs_spec
+        if not isinstance(obs_spec, list):
+            obs_spec = [obs_spec]
+        result = []
+        lmt_fs = self.lmt_fs
+        toltec_fs = self.toltec_fs
+        for s in obs_spec:
+            r = self._get_raw_obs_info_table(lmt_fs, toltec_fs, s)
+            if r is None:
+                continue
+            if isinstance(r, list):
+                r = guess_info_from_sources([resolve_symlink(f) for f in r])
+            result.append(r)
+        result = pd.concat(result) if result else None
+        n_files = 0 if result is None else len(result)
+        if n_files > 0:
+            logger.debug(
+                f"resovled {n_files} files from {obs_spec=}\n{result.toltec_file.pformat()}"
+            )
+        if raise_on_multiple and n_files > 1:
+            raise ValueError(
+                f"ambiguous files found for {obs_spec=}:\n{result.toltec_file.pformat()}",
+            )
+        if raise_on_empty and n_files == 0:
+            raise ValueError(f"no files found for {obs_spec=}")
+        return result
+
+    @staticmethod
+    def _replace_parent_path(path, parent_path, ensure_exist=False):
+        path = Path(path)
+        parent_path = Path(parent_path)
+        parent_name = parent_path.name
+        for pp in path.parents:
+            if pp.name == parent_name:
+                subpath = path.relative_to(pp)
+                break
+        else:
+            return None
+        path = parent_path.joinpath(subpath)
+        if ensure_exist and not path.exists():
+            return None
+        return path
+
+    @classmethod
+    def _get_raw_obs_info_table(cls, lmt_fs, toltec_fs, obs_spec):
         logger.debug(f"resovle {obs_spec=}")
         if obs_spec is None:
-            toltec_fs = self.toltec_fs
             if toltec_fs is None:
                 logger.error("no toltec data path specified.")
                 return None
@@ -204,89 +275,76 @@ class LmtToltecPathOption:
                     "unable to interfer current obs info: no symlink in data root."
                 )
                 return None
+            logger.debug(f"toltec symlink info in {toltec_fs.path}:\n{tbl}")
             tbl = guess_info_from_sources([resolve_symlink(p) for p in tbl["path"]])
-            info = tbl.toltec_file.get_latest()
-            logger.debug(f"resolved latest obs info:{pformat_yaml(info.model_dump())}")
-            files = [info.filepath]
-        elif re.match(r"^(.*/)?toltec.+\.nc", obs_spec):
-            file = Path(obs_spec)
-            logger.debug(f"resovled {file=}")
-            if file.exists():
-                files = [file]
-            else:
-                logger.error(f"resovled file does not exist: {file}")
-                files = []
-        else:
-            info = dict_from_regex_match(
-                r"^(?P<obsnum>\d+)"
-                r"(?:-(?P<subobsnum>\d+)"
-                r"(?:-(?P<scannum>\d+)(?:-(?P<roach>\d+))?)?)?",
-                obs_spec,
-                type_dispatcher={
-                    "obsnum": int,
-                    "subobsnum": int,
-                    "scannum": int,
-                    "roach": int,
-                },
+            # get latest raw obs group
+            tbl_latest = tbl.toltec_file.get_raw_obs_latest()
+            logger.debug(
+                f"resolved latest raw obs info from {obs_spec=}:\n"
+                f"{tbl_latest.toltec_file.pformat()}"
             )
-            if info is not None:
-                obsnum = info["obsnum"]
-                subobsnum = info["subobsnum"]
-                scannum = info["scannum"]
-                roach = info["roach"]
-
-                logger.debug(f"resolved {obsnum=} {subobsnum=} {scannum=} {roach=}")
-
-                data_lmt_path = option.data_lmt_path
-                p_interface = "toltec*" if roach is None else f"toltec{roach}"
-                p_obsnum = f"_{obsnum:06d}"
-                p_subobsnum = "_*" if subobsnum is None else f"_{subobsnum:03d}"
-                p_scannum = "_*" if scannum is None else f"_{scannum:04d}"
-                p = f"{p_interface}/{p_interface}{p_obsnum}{p_subobsnum}{p_scannum}_*.nc"
-                glob_patterns = [
-                    f"toltec/ics/{p}",
-                    f"toltec/tcs/{p}",
-                ]
-                logger.debug(
-                    f"search file pattern:\n{pformat_yaml(glob_patterns)}\nin {data_lmt_path=}"
-                )
-                files = list(
-                    itertools.chain(*(data_lmt_path.glob(p) for p in glob_patterns))
-                )
-            else:
-                logger.error(f"unknown {obs_spec=}")
-                files = []
-        if not files:
-            logger.error(f"no files can be resolved from obs specifier {obs_spec}")
-            return None
-        files = [resolve_symlink(f) for f in files]
-        logger.debug(
-            f"resovled {len(files)} files from {obs_spec=}\n{pformat_yaml(files)}"
+            return tbl_latest
+        if re.match(r"^(.*/)?toltec.+\.nc", obs_spec):
+            file = Path(obs_spec)
+            if file.exists():
+                logger.debug(f"resovled {file=} from {obs_spec=}")
+                return [file]
+            # try to locate the file under the provided root
+            data_lmt_path = lmt_fs.path
+            logger.debug(
+                f"search file with matched subpath for {file} in {data_lmt_path}",
+            )
+            file = cls._replace_parent_path(file, data_lmt_path, ensure_exist=True)
+            if file is None:
+                logger.error(f"no matched file found for {file} in {data_lmt_path}")
+                return None
+            logger.debug(f"resovled {file=} from {obs_spec=}")
+            return [file]
+        info = dict_from_regex_match(
+            r"^(?P<obsnum>\d+)"
+            r"(?:-(?P<subobsnum>\d+)"
+            r"(?:-(?P<scannum>\d+)(?:-(?P<roach>\d+))?)?)?",
+            obs_spec,
+            type_dispatcher={
+                "obsnum": int,
+                "subobsnum": int,
+                "scannum": int,
+                "roach": int,
+            },
         )
-        if unique:
-            if len(files) > 1:
-                raise ValueError(f"ambiguous files found from {obs_spec=}")
-            return files[0]
+        if info is None:
+            logger.error(f"unable to resolve {obs_spec=} by regex match")
+            return None
+        obsnum = info["obsnum"]
+        subobsnum = info["subobsnum"]
+        scannum = info["scannum"]
+        roach = info["roach"]
+        logger.debug(
+            f"resolved {obsnum=} {subobsnum=} {scannum=} {roach=} "
+            f"from {obs_spec=} by regex match",
+        )
+        data_lmt_path = lmt_fs.path
+        p_interface = "toltec*" if roach is None else f"toltec{roach}"
+        p_obsnum = f"_{obsnum:06d}"
+        p_subobsnum = "_*" if subobsnum is None else f"_{subobsnum:03d}"
+        p_scannum = "_*" if scannum is None else f"_{scannum:04d}"
+        p = f"{p_interface}/{p_interface}{p_obsnum}{p_subobsnum}{p_scannum}_*.nc"
+        glob_patterns = [
+            f"toltec/ics/{p}",
+            f"toltec/tcs/{p}",
+        ]
+        logger.debug(
+            f"search file patterns in {data_lmt_path=}:\n"
+            f"{pformat_yaml(glob_patterns)}",
+        )
+        files = list(itertools.chain(*(data_lmt_path.glob(p) for p in glob_patterns)))
+        if not files:
+            logger.error(f"no files found for {obs_spec=} in {data_lmt_path=}")
+            return None
         return files
 
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    LmtToltecPathOption.add_args_to_parser(parser)
-    option = parser.parse_args()
-    path_option = LmtToltecPathOption(option)
-
-    files = path_option.get_raw_obs_files()
-
-    if not files:
-        raise ValueError(f"no file path found for obs_spec={option.obs_spec}")
-    info = guess_info_from_sources(files).toltec_file.get_latest()
-    # now get various extra
-    info_extra = {
-        "apt_filename": get_apt_filename(info),
-        "obs_goal": get_obs_goal(path_option.lmt_fs, info),
-    }
+def to_bash_source(info: SourceInfoModel, extra=None, variable_prefix="tfu_"):
     output_lns = []
     output_fields = [
         "obsnum",
@@ -297,13 +355,37 @@ if __name__ == "__main__":
         "uid_obs",
         "uid_raw_obs",
     ]
+
+    def _make_var_name(field):
+        return f"{variable_prefix}{field}"
+
+    def _make_var(field, value):
+        return f"{_make_var_name(field)}={value}"
+
     for field in output_fields:
-        output_lns.append(f"tfu_{field}={getattr(info, field)}")
+        output_lns.append(_make_var(field, getattr(info, field)))
 
-    for field, value in info_extra.items():
-        output_lns.append(f"tfu_{field}={value if value is not None else ''}")
+    extra = extra or None
+    for field, value in extra.items():
+        output_lns.append(_make_var(field, value if value is not None else ""))
+    return "\n".join(output_lns)
 
-    print("\n".join(output_lns))
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    LmtToltecPathOption.add_args_to_parser(parser)
+    option = parser.parse_args()
+    path_option = LmtToltecPathOption(option)
+
+    tbl = path_option.get_raw_obs_info_table(raise_on_empty=True)
+    # get the latest item from the list
+    info = tbl.toltec_file.get_info_latest()
+    info_extra = {
+        "apt_filename": get_apt_filename(info),
+        "obs_goal": get_obs_goal(path_option.lmt_fs, info),
+    }
+    print(to_bash_source(info, extra=info_extra))
     # def _print_and_exit(v):
     #     print(v)
     #     sys.exit(0)
