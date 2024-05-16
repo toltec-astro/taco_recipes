@@ -14,27 +14,19 @@ print_env || { echo 'unable to load script env, exit.' ; exit 1; }
 ## actual script starts form here
 
 if [[ ! $1 ]]; then
-    echo "Usage: $0 file [tolteca_kids_options]"
+    echo "Usage: $0 obs_spec [tolteca_kids_options]"
     exit 1
 fi
-file=$1
+obs_spec=$1
 shift
-outputdir=${dataroot}/toltec/reduced
-if [[ ! -d ${outputdir} ]]; then
-    outputdir=${scratchdir}
-fi
 
-
-echo "processing ${file}"
-set -x
-${pybindir}/python3 ${scriptdir}/dispatch_tolteca_kids.py ${file} \
+echo "processing ${obs_spec}"
+dispatch_py ${obs_spec} \
     --data_lmt_path ${dataroot} \
     --config ${scriptdir}/tolteca_config.d \
-    --kids.sweep_check_plot.save_rootpath ${scratchdir} \
-    --kids.kids_find_plot.save_rootpath ${scratchdir}  \
-    --kids.output.subdir_fmt null \
-    --kids.output.path ${outputdir} \
+    --kids.output.path ${scratchdir} \
+    --kids.sweep_check_plot.save_path ${scratchdir} \
+    --kids.kids_find_plot.save_path ${scratchdir}  \
     --kids.tlaloc_output.enabled \
     --kids.tlaloc_output.path ${tlalocetcdir} \
     "$@"
-set +x

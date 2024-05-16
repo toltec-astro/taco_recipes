@@ -2,10 +2,10 @@ from __future__ import annotations
 from astropy.table import QTable
 import sys
 import astropy.units as u
-from tolteca_datamodels.toltec.file import guess_info_from_sources
 from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
-from tollan.utils.log import logger
+from tollan.utils.log import logger, reset_logger
+from tollan.utils.fmt import pformat_yaml
 from pathlib import Path
 from tolteca_datamodels.toltec.types import ToltecRoachInterface, ToltecArray
 from tolteca_kids.kids_find import SegmentBitMask
@@ -17,16 +17,21 @@ if TYPE_CHECKING:
     from tolteca_datamodels.toltec.file import SourceInfoDataFrame, SourceInfoModel
 
 
-def _find_file(patterns, search_paths, unique=True):
-    logger.debug(f"search patterns: {patterns}")
+def _find_file(patterns, search_paths, subpaths=None, unique=True):
+    logger.debug(f"search patterns in paths:\n{pformat_yaml(patterns)}")
     files = []
+    subpaths = subpaths or [""]
     for path in search_paths:
-        for pattern in patterns:
-            files += list(Path(path).glob(pattern))
-            logger.debug(f"found files: {files}")
-            if unique:
-                if len(files) == 1:
-                    return files[0]
+        for sp in subpaths:
+            pp = Path(path).joinpath(sp)
+            for pattern in patterns:
+                ff = list(pp.glob(pattern))
+                if ff:
+                    logger.debug(f"found files in {pp}:\n{pformat_yaml(ff)}")
+                files.extend(ff)
+                if unique:
+                    if len(files) == 1:
+                        return files[0]
     if files:
         return files
     return None
@@ -50,7 +55,7 @@ def _ensure_find_file(*args, timeout=60, **kwargs):
         return file
 
 
-def _collect_kids_info(entry: SourceInfoModel, search_paths):
+def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=60):
     interface = entry.interface
     nw = entry.roach
     obsnum = entry.obsnum
@@ -58,8 +63,9 @@ def _collect_kids_info(entry: SourceInfoModel, search_paths):
     scannum = entry.scannum
 
     logger.debug(f"collect kids info for {interface}_{obsnum}_{subobsnum}_{scannum}")
-    logger.debug(f"search paths: {search_paths}")
+    logger.debug(f"search paths:\n{pformat_yaml(search_paths)}")
     prefix = f"{interface}_{obsnum:06d}_{subobsnum:03d}_{scannum:04d}_"
+    subpaths = ["", entry.uid_raw_obs, entry.uid_obs]
 
     def _load_table(t):
         if t is not None:
@@ -69,10 +75,19 @@ def _collect_kids_info(entry: SourceInfoModel, search_paths):
         return None
 
     tonelist_table = _load_table(
-        _ensure_find_file([f"{prefix}*_kids_find.ecsv"], search_paths)
+        _ensure_find_file(
+            [f"{prefix}*_kids_find.ecsv"],
+            search_paths,
+            subpaths=subpaths,
+            timeout=timeout,
+        ),
     )
     checktone_table = _load_table(
-        _find_file([f"{prefix}*_chan_prop.ecsv"], search_paths)
+        _find_file(
+            [f"{prefix}*_chan_prop.ecsv"],
+            search_paths,
+            subpaths=subpaths,
+        )
     )
     kidscpp_table = _load_table(
         _find_file(
@@ -82,6 +97,7 @@ def _collect_kids_info(entry: SourceInfoModel, search_paths):
                 f"{prefix}*_tune.txt",
             ],
             search_paths,
+            subpaths=subpaths,
         )
     )
     # targfreqs_table = _load_table(
@@ -95,7 +111,11 @@ def _collect_kids_info(entry: SourceInfoModel, search_paths):
     #         search_paths,
     #     )
     # )
-    context_data = _find_file([f"{prefix}*_ctx.pkl"], search_paths)
+    context_data = _find_file(
+        [f"{prefix}*_ctx.pkl"],
+        search_paths,
+        subpaths=subpaths,
+    )
     return locals()
 
 
@@ -260,13 +280,13 @@ def _plot_finding_ratio_nw(
     apt = data.get("apt", None)
     tct = data.get("checktone_table", None)
     kct = data.get("kidscpp_table", None)
-    logger.debug(f"{data=}")
+    # logger.debug(f"data:\n{pformat_yaml(data)}")
     if any(
         [
             tlt is None,
             apt is None,
             tct is None,
-            kct is None,
+            # kct is None,
         ]
     ):
         # msg = [tft is None, apt is None, tct is None, kct is None]
@@ -469,10 +489,10 @@ def _make_kids_plot(
     search_paths = search_paths or []
     if output_dir is not None:
         search_paths.append(Path(output_dir))
-    for entry in tbl.itertuples():
-        nw = entry.roach
-        search_paths = search_paths + [entry.filepath.parent]
-        kids_info[nw].update(_collect_kids_info(entry, search_paths))
+    for source_info in tbl.toltec_file.to_info_list():
+        nw = source_info.roach
+        search_paths = search_paths + [source_info.filepath.parent]
+        kids_info[nw].update(_collect_kids_info(source_info, search_paths))
         if apt_design is not None:
             kids_info[nw].update(_make_per_nw_apt_info(nw, apt_design))
 
@@ -541,8 +561,8 @@ def _make_kids_plot(
         _plot_finding_ratio_array(ax_array=ax_array, nw_ctxs=nw_ctxs)
 
     fig = fctx["fig"]
-    obsnum = tbl["obsnum"][0]
-    ut = tbl["file_timestamp"][0]
+    obsnum = tbl.iloc[0]["obsnum"]
+    ut = tbl.iloc[0]["file_timestamp"]
     fig.suptitle(f"KIDs Summary ObsNum={obsnum} ({ut})")
     fig.tight_layout()
     if show_plot:
@@ -581,9 +601,10 @@ def _get_or_create_default_apt(apt_filepath):
 
 if __name__ == "__main__":
     import argparse
+    from toltec_file_utils import LmtToltecPathOption
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("filepaths", nargs="+")
+    parser.add_argument("obs_spec", nargs="+")
     parser.add_argument(
         "--search_paths",
         nargs="*",
@@ -591,8 +612,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--apt_design",
     )
-    parser.add_argument("--data_lmt_path", default=None)
-    parser.add_argument("--output_dir", required=True)
+    parser.add_argument("--data_lmt_path", type=Path, default=None)
+    parser.add_argument("--output_dir", type=Path, required=True)
     parser.add_argument("--log_level", default="INFO")
     parser.add_argument(
         "--show_plot",
@@ -600,39 +621,19 @@ if __name__ == "__main__":
     )
 
     option = parser.parse_args()
+    reset_logger(level=option.log_level)
+    logger.debug(f"parsed options: {option}")
+    path_option = LmtToltecPathOption(option)
 
-    logger.remove()
-    logger.add(sys.stdout, level=option.log_level)
-
-    if option.data_lmt_path is not None:
-        # replace the root directory
-        data_lmt_path = Path(option.data_lmt_path)
-
-        def _replace_root(p):
-            p = Path(p)
-            for pp in p.parents:
-                if pp.name == "data_lmt":
-                    subpath = p.relative_to(pp)
-                    break
-            else:
-                return p
-            return data_lmt_path.joinpath(subpath)
-
-        filepaths = map(_replace_root, option.filepaths)
-    else:
-        filepaths = option.filepaths
-
-    filepaths = [Path(fp) for fp in filepaths if Path(fp).exists()]
-    if not filepaths:
-        logger.error("no valid files, exit.")
+    tbl = path_option.get_raw_obs_info_table()
+    if tbl is None:
+        logger.error("no valid files specified, exit.")
         sys.exit(1)
-
-    tbl = guess_info_from_sources(filepaths)
-    logger.debug(f"loaded files:\n{tbl}")
-
-    if len(np.unique(tbl["obsnum"])) > 1:
-        logger.error("files are not from one single obsnum, exit")
+    tbl = tbl.query("file_suffix in ['tune', 'targsweep', 'vnasweep']")
+    if len(np.unique(tbl["uid_raw_obs"])) > 1:
+        logger.error("files are not from one single raw obs")
         sys.exit(1)
+    logger.debug(f"loaded raw obs files:\n{tbl}")
 
     # create output dir
     obsnum = tbl["obsnum"][0]
