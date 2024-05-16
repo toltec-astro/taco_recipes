@@ -21,14 +21,19 @@ def _ensure_source_info(data):
 kids_script_dir = taco_recipe_script_dir.joinpath("kids")
 
 
-def run_tolteca_kids(data, log_level="INFO"):
+def run_tolteca_kids(data, log_level="INFO", dp_dir="/data_lmt/toltec/reduced"):
     source_info = _ensure_source_info(data)
+    dp_dir = dp_dir
     cmd = [
         "bash",
         kids_script_dir.joinpath("dispatch_tolteca_kids.sh"),
         source_info.filepath,
         "--log_level",
         log_level,
+        "--kids.output.path",
+        dp_dir,
+        "--kids.output.subdir_fmt",
+        "null",
     ]
     return pty_run(cmd)
 
@@ -102,16 +107,28 @@ class TlalocAction:
     actions: ClassVar[list[TlalocActionType]] = list(get_args(TlalocActionType))
 
     @classmethod
-    def vna_reduce(cls, data, log_level, **kwargs):
-        return run_tolteca_kids(data, log_level=log_level)
+    def vna_reduce(cls, data, log_level, dp_dir, **kwargs):
+        return run_tolteca_kids(
+            data,
+            log_level=log_level,
+            dp_dir=dp_dir,
+        )
 
     @classmethod
-    def targ_reduce(cls, data, log_level, **kwargs):
-        return run_tolteca_kids(data, log_level=log_level)
+    def targ_reduce(cls, data, log_level, dp_dir, **kwargs):
+        return run_tolteca_kids(
+            data,
+            log_level=log_level,
+            dp_dir=dp_dir,
+        )
 
     @classmethod
-    def timestream_reduce(cls, data, log_level, **kwargs):
-        return run_tolteca_kids(data, log_level=log_level)
+    def timestream_reduce(cls, data, log_level, dp_dir, **kwargs):
+        return run_tolteca_kids(
+            data,
+            log_level=log_level,
+            dp_dir=dp_dir,
+        )
 
     @classmethod
     def drivefit_reduce(cls, data, **kwargs):
@@ -199,5 +216,6 @@ if __name__ == "__main__":
             data=source_info,
             etc_dir=etc_dir,
             log_level=option.log_level,
+            dp_dir=path_option.lmt_fs.path.joinpath("toltec/reduced"),
         )
     )
