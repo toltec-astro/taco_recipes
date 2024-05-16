@@ -23,12 +23,13 @@ def reduce_sweep(rc: RuntimeContext, data):
         except Exception as e:
             logger.opt(exception=True).error(f"reduce sweep failed for {filepath}: {e}")
             returncode = 1
+            message = "reduction failed"
         else:
+            ctx = kids.kids_find.get_context(swp)
+            n_chans = swp.n_chans
+            n_kids = len(ctx.data.detected)
+            message = f"{n_kids=} {n_chans=}"
             returncode = 0
-        ctx = kids.kids_find.get_context(swp)
-        n_chans = swp.n_chans
-        n_kids = len(ctx.data.detected)
-        message = f"{n_kids=} {n_chans=}"
         return returncode, locals()
 
 
