@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Literal, get_args, ClassVar
 
 from tollan.utils.general import ensure_abspath
-from tollan.utils.fmt import pformat_yaml
 from tollan.utils.log import logger, reset_logger, timeit
 from tollan.utils.sys import pty_run
 from tolteca_datamodels.toltec.file import guess_info_from_source, SourceInfoModel
@@ -189,13 +188,11 @@ if __name__ == "__main__":
     logger.debug(f"resolved {etc_dir=}")
 
     path_option = LmtToltecPathOption(option, tlaloc_etc_path=etc_dir)
-    filepath = path_option.get_raw_obs_files(unique=True)
-    if filepath is None:
-        raise ValueError(f"no files found for obs_spec={option.obs_spec}")
-    source_info = guess_info_from_source(filepath)
-    logger.debug(
-        f"resolved info for {filepath=}\n{pformat_yaml(source_info.model_dump())}"
+    tbl = path_option.get_raw_obs_info_table(
+        raise_on_empty=True,
+        raise_on_multiple=True,
     )
+    source_info = tbl.toltec_file.to_info_list()[0]
     sys.exit(
         TlalocAction.run(
             option.action,
