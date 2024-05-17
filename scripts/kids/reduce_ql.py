@@ -111,11 +111,11 @@ def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=60):
     #         search_paths,
     #     )
     # )
-    context_data = _find_file(
-        [f"{prefix}*_ctx.pkl"],
-        search_paths,
-        subpaths=subpaths,
-    )
+    # context_data = _find_file(
+    #     [f"{prefix}*_ctx.pkl"],
+    #     search_paths,
+    #     subpaths=subpaths,
+    # )
     return locals()
 
 
@@ -647,7 +647,7 @@ if __name__ == "__main__":
     search_paths.append(
         output_dir,
     )
-    
+
     if option.apt_design is not None:
         apt = QTable.read(option.apt_design, format="ascii.ecsv")
     else:
