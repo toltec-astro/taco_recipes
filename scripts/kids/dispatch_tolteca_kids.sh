@@ -17,16 +17,9 @@ if [[ ! $1 ]]; then
     echo "Usage: $0 obs_spec [tolteca_kids_options]"
     exit 1
 fi
-obs_spec=$1
-shift
-
-echo "processing ${obs_spec}"
-dispatch_py ${obs_spec} \
-    --data_lmt_path ${dataroot} \
+dispatch_py \
     --config ${scriptdir}/tolteca_config.d \
-    --kids.output.path ${scratchdir} \
-    --kids.sweep_check_plot.save_path ${scratchdir} \
-    --kids.kids_find_plot.save_path ${scratchdir}  \
-    --kids.tlaloc_output.enabled \
-    --kids.tlaloc_output.path ${tlalocetcdir} \
+    --data_lmt_path ${dataroot} \
+    --dataprod_path ${scratchdir} \
+    --tlaloc_etc_path ${tlalocetcdir} \
     "$@"

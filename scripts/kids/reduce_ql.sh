@@ -24,10 +24,12 @@ output_dir=${qldir}
 echo "run kids ql reduce for ${obs_specs}"
 echo "output_dir: ${output_dir}"
 dispatch_py ${obs_specs} \
-    --output_dir ${output_dir} --log_level DEBUG \
+    --log_level DEBUG \
+    --output_dir ${output_dir} \
     --search_paths \
     ${scratchdir} \
     ${dataroot}/toltec/reduced \
     ${dataroot}/toltec_clip{a,o}/reduced \
-    --data_lmt_path ${dataroot} > ${logdir}/reduce_kids_ql.log
+    --data_lmt_path ${dataroot} \
+    > ${logdir}/reduce_kids_ql.log
 
