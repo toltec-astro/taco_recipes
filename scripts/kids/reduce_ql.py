@@ -604,28 +604,28 @@ if __name__ == "__main__":
     from toltec_file_utils import LmtToltecPathOption
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("obs_spec", nargs="+")
+    parser.add_argument("--log_level", default="INFO")
+    parser.add_argument(
+        "--apt_design",
+    )
     parser.add_argument(
         "--search_paths",
         nargs="*",
     )
-    parser.add_argument(
-        "--apt_design",
-    )
-    parser.add_argument("--data_lmt_path", type=Path, default=None)
     parser.add_argument("--output_dir", type=Path, required=True)
-    parser.add_argument("--log_level", default="INFO")
     parser.add_argument(
         "--show_plot",
         action="store_true",
     )
+    LmtToltecPathOption.add_obs_spec_argument(parser, required=True, multi=True)
+    LmtToltecPathOption.add_data_lmt_path_argument(parser)
 
     option = parser.parse_args()
     reset_logger(level=option.log_level)
     logger.debug(f"parsed options: {option}")
     path_option = LmtToltecPathOption(option)
 
-    tbl = path_option.get_raw_obs_info_table()
+    tbl = path_option.get_raw_obs_info_table().sort_values("roach")
     if tbl is None:
         logger.error("no valid files specified, exit.")
         sys.exit(1)
@@ -636,15 +636,10 @@ if __name__ == "__main__":
     logger.debug(f"loaded raw obs files:\n{tbl}")
 
     # create output dir
-    obsnum = tbl["obsnum"][0]
+    uid_obs = tbl.iloc[0]["uid_obs"]
     output_dir = Path(option.output_dir)
+    ql_output_dir = output_dir.joinpath(uid_obs)
 
-    if option.apt_design is not None:
-        apt = QTable.read(option.apt_design, format="ascii.ecsv")
-    else:
-        apt = _get_or_create_default_apt(output_dir.joinpath("apt_design.ecsv"))
-
-    ql_output_dir = output_dir.joinpath(str(obsnum))
     if not ql_output_dir.exists():
         ql_output_dir.mkdir(parents=True)
 
@@ -652,6 +647,12 @@ if __name__ == "__main__":
     search_paths.append(
         output_dir,
     )
+    
+    if option.apt_design is not None:
+        apt = QTable.read(option.apt_design, format="ascii.ecsv")
+    else:
+        apt = _get_or_create_default_apt(output_dir.joinpath("apt_design.ecsv"))
+
     ql_prods = make_quicklook_prod(
         tbl,
         show_plot=option.show_plot,

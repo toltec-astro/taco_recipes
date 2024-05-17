@@ -50,30 +50,46 @@ if __name__ == "__main__":
     import argparse
     import numpy as np
     from toltec_file_utils import LmtToltecPathOption
-    from tollan.utils.cli import dict_from_cli_args
+    from tollan.utils.cli import dict_from_cli_args, split_cli_args
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="tolteca.yaml")
     parser.add_argument("--log_level", default="INFO", help="The log level.")
     parser.add_argument("--save_plot", action="store_true", help="Save plots.")
     LmtToltecPathOption.add_args_to_parser(parser, obs_spec_required=True)
-    option, unparsed_args = parser.parse_known_args()
+
+    kids_cli_args, args = split_cli_args("^kids\..+", sys.argv[1:])
+    logger.debug(
+        f"kids_cli_args:\n{pformat_yaml(kids_cli_args)}\n"
+        f"other_args:\n{pformat_yaml(args)}",
+    )
+    option = parser.parse_args(args)
     reset_logger(level=option.log_level)
     logger.debug(f"parsed options: {option}")
-    logger.debug(f"unparsed args: {unparsed_args}")
     path_option = LmtToltecPathOption(option)
 
-    tbl = path_option.get_raw_obs_info_table(raise_on_empty=True)
-
-    rc = RuntimeContext(option.config)
+    tbl = path_option.get_raw_obs_info_table(raise_on_empty=True).sort_values("roach")
+    kids_cli_args[:0] = [
+        "--kids.sweep_check_plot.save_path",
+        path_option.dataprod_path,
+        "--kids.kids_find_plot.save_path",
+        path_option.dataprod_path,
+        "--kids.output.path",
+        path_option.dataprod_path,
+        "--kids.tlaloc_output.enabled",
+        "--kids.tlaloc_output.path",
+        path_option.tlaloc_etc_path,
+    ]
     if option.save_plot:
-        unparsed_args.extend(
+        kids_cli_args.extend(
             [
                 "--kids.sweep_check_plot.enabled",
                 "--kids.kids_find_plot.enabled",
             ],
         )
-    rc.config_backend.update_override_config(dict_from_cli_args(unparsed_args))
+
+    rc = RuntimeContext(option.config)
+    rc.config_backend.update_override_config(dict_from_cli_args(kids_cli_args))
     logger.info(f"{pformat_yaml(rc.config.model_dump())}")
 
     returncodes = []

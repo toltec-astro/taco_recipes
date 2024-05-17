@@ -2,13 +2,14 @@ from __future__ import annotations
 from pathlib import Path
 from tolteca_datamodels.lmt.filestore import LmtFileStore
 from tolteca_datamodels.toltec.filestore import ToltecFileStore
+from typing import ClassVar
 import pandas as pd
 import itertools
 from tollan.utils.log import logger
 import re
 from types import SimpleNamespace
 import argparse
-from tollan.utils.general import ensure_abspath, dict_from_regex_match, resolve_symlink
+from tollan.utils.general import dict_from_regex_match, resolve_symlink
 from tolteca_datamodels.toltec.file import (
     guess_info_from_sources,
     SourceInfoModel,
@@ -125,35 +126,89 @@ class LmtToltecPathOption:
         obs_spec_required=False,
     ):
         defaults = defaults or {}
+
+        def _get_path_arg_kw(key):
+            if key in defaults:
+                return {"default": defaults[key]}
+            return {}
+
+        cls.add_data_lmt_path_argument(parser, **_get_path_arg_kw("data_lmt_path"))
+        cls.add_dataprod_path_argument(parser, **_get_path_arg_kw("dataprod_path"))
+        cls.add_tlaloc_etc_path_argument(parser, **_get_path_arg_kw("tlaloc_etc_path"))
+        cls.add_obs_spec_argument(parser, required=obs_spec_required)
+
+    _default_paths: ClassVar = {
+        "data_lmt_path": "/data_lmt",
+        "dataprod_path": "/dataprod_toltec",
+        "tlaloc_etc_path": "/tlaloc_etc",
+    }
+
+    @classmethod
+    def add_data_lmt_path_argument(
+        cls,
+        parser: argparse.ArgumentParser,
+        default=_default_paths["data_lmt_path"],
+    ):
         parser.add_argument(
             "--data_lmt_path",
             type=Path,
-            default=defaults.get("data_lmt_path", "/data_lmt"),
+            default=default,
             help="data_lmt path.",
         )
+
+    @classmethod
+    def add_dataprod_path_argument(
+        cls,
+        parser: argparse.ArgumentParser,
+        default=_default_paths["dataprod_path"],
+    ):
         parser.add_argument(
             "--dataprod_path",
             type=Path,
-            default=defaults.get("dataprod_path", "/dataprod_toltec"),
+            default=default,
             help="data product path.",
         )
+
+    @classmethod
+    def add_tlaloc_etc_path_argument(
+        cls,
+        parser: argparse.ArgumentParser,
+        default=_default_paths["tlaloc_etc_path"],
+    ):
         parser.add_argument(
             "--tlaloc_etc_path",
             type=Path,
-            default=defaults.get("tlaloc_etc_path", ensure_abspath("/tlaloc_etc")),
+            default=default,
             help="tlaloc etc path.",
         )
-        if obs_spec_required:
-            obs_spec_kw = {}
+
+    @classmethod
+    def add_obs_spec_argument(
+        cls,
+        parser: argparse.ArgumentParser,
+        required=False,
+        multi=False,
+    ):
+        if multi and required:
+            kw = {
+                "nargs": "+",
+            }
+        elif multi:
+            kw = {
+                "nargs": "*",
+                "default": None,
+            }
+        elif required:
+            kw = {}
         else:
-            obs_spec_kw = {
+            kw = {
                 "nargs": "?",
                 "default": None,
             }
         parser.add_argument(
             "obs_spec",
             help="specifier of obs data.",
-            **obs_spec_kw,
+            **kw,
         )
 
     @property

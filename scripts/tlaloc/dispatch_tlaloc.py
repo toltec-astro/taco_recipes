@@ -16,22 +16,36 @@ taco_recipe_script_dir = Path(__file__).parent.parent
 kids_script_dir = taco_recipe_script_dir.joinpath("kids")
 
 
-def run_tolteca_kids(tbl, log_level="INFO", dp_dir="/data_lmt/toltec/reduced"):
-    returncodes = []
-    for source_info in tbl.toltec_file.to_info_list():
-        cmd = [
+def run_tolteca_kids(
+    obs_spec,
+    unparsed_args,
+    data_lmt_path,
+    etc_path,
+    log_level="INFO",
+    **kwargs,
+):
+    output_path = data_lmt_path.joinpath("toltec/reduced")
+    cmd = (
+        [
             "bash",
             kids_script_dir.joinpath("dispatch_tolteca_kids.sh"),
-            source_info.filepath,
             "--log_level",
             log_level,
+            "--data_lmt_path",
+            data_lmt_path,
+            "--tlaloc_etc_path",
+            etc_path,
+            "--kids.output.enabled",
             "--kids.output.path",
-            dp_dir,
+            output_path,
             "--kids.output.subdir_fmt",
             "null",
+            "--kids.tlaloc_output.enabled",
         ]
-        returncodes.append(pty_run(cmd))
-    return np.sum(returncodes)
+        + unparsed_args
+        + ["--", obs_spec]
+    )
+    return pty_run(cmd)
 
 
 drivefit_script_dir = taco_recipe_script_dir.joinpath("drivefit")
@@ -109,46 +123,34 @@ class TlalocAction:
     actions: ClassVar[list[TlalocActionType]] = list(get_args(TlalocActionType))
 
     @classmethod
-    def vna_reduce(cls, tbl, log_level, dp_dir, **kwargs):
-        return run_tolteca_kids(
-            tbl,
-            log_level=log_level,
-            dp_dir=dp_dir,
-        )
+    def vna_reduce(cls, *args, **kwargs):
+        return run_tolteca_kids(*args, **kwargs)
 
     @classmethod
-    def targ_reduce(cls, tbl, log_level, dp_dir, **kwargs):
-        return run_tolteca_kids(
-            tbl,
-            log_level=log_level,
-            dp_dir=dp_dir,
-        )
+    def targ_reduce(cls, *args, **kwargs):
+        return run_tolteca_kids(*args, **kwargs)
 
     @classmethod
-    def timestream_reduce(cls, tbl, log_level, dp_dir, **kwargs):
-        return run_tolteca_kids(
-            tbl,
-            log_level=log_level,
-            dp_dir=dp_dir,
-        )
+    def timestream_reduce(cls, *args, **kwargs):
+        return run_tolteca_kids(*args, **kwargs)
 
     @classmethod
-    def drivefit_reduce(cls, tbl, **kwargs):
-        return run_drivefit(tbl)
+    def drivefit_reduce(cls, *args, **kwargs):
+        return run_drivefit(*args, **kwargs)
 
     @classmethod
-    def drivefit_commit(cls, tbl, etc_dir, **kwargs):
-        return run_drivefit_commit(tbl, etc_dir=etc_dir)
+    def drivefit_commit(cls, *args, **kwargs):
+        return run_drivefit_commit(*args, **kwargs)
 
     @classmethod
-    def dry_run(cls, tbl, **kwargs):
-        logger.info(f"DRY RUN:\n{tbl}\n{kwargs=}")
+    def dry_run(cls, *args, **kwargs):
+        logger.info(f"DRY RUN:\n{args=}\n{kwargs=}")
         return 0
 
     @classmethod
-    def run(cls, action, tbl, **kwargs) -> int:
+    def run(cls, action, *args, **kwargs) -> int:
         with timeit(f"run tlaloc {action=}", level="INFO"):
-            return getattr(cls, action)(tbl, **kwargs)
+            return getattr(cls, action)(*args, **kwargs)
 
 
 if __name__ == "__main__":
@@ -157,7 +159,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Dispatch kids related calls from tlaloc."
     )
+    parser.add_argument("--log_level", default="DEBUG", help="The log level.")
     g = parser.add_mutually_exclusive_group()
+
     g.add_argument(
         "--fg_plot",
         "-f",
@@ -180,42 +184,34 @@ if __name__ == "__main__":
         "--output",
         "-o",
         type=Path,
-        help="The tlaloc output directory.",
+        help="No-op, existing for compat purpose.",
     )
-    parser.add_argument("--log_level", default="INFO", help="The log level.")
-
     parser.add_argument(
         "--action",
         required=True,
         choices=TlalocAction.actions,
         help="The tlaloc action.",
     )
-    LmtToltecPathOption.add_args_to_parser(parser, obs_spec_required=True)
-    option = parser.parse_args()
+    parser.add_argument(
+        "--etc_path",
+        default="~/tlaloc/etc",
+        type=ensure_abspath,
+        help="data_lmt path",
+    )
+    LmtToltecPathOption.add_data_lmt_path_argument(parser)
+    LmtToltecPathOption.add_obs_spec_argument(parser)
+
+    option, unparsed_args = parser.parse_known_args()
     reset_logger(level=option.log_level)
     logger.debug(f"parsed options: {option}")
 
-    # TODO: may need to update tlaloc to make this better describing its purpose.
-    output = option.output
-    if output is not None:
-        if output.is_dir():
-            etc_dir = output
-        else:
-            etc_dir = output.parent.parent
-    else:
-        etc_dir = ensure_abspath("~/tlaloc/etc")
-    logger.debug(f"resolved {etc_dir=}")
-
-    path_option = LmtToltecPathOption(option, tlaloc_etc_path=etc_dir)
-    tbl = path_option.get_raw_obs_info_table(
-        raise_on_empty=True,
-    )
     sys.exit(
         TlalocAction.run(
             option.action,
-            tbl=tbl,
-            etc_dir=etc_dir,
+            option.obs_spec,
+            unparsed_args=unparsed_args,
+            data_lmt_path=option.data_lmt_path,
+            etc_path=option.etc_path,
             log_level=option.log_level,
-            dp_dir=path_option.lmt_fs.path.joinpath("toltec/reduced"),
         )
     )
