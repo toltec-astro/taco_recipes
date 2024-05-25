@@ -13,13 +13,4 @@ print_env || { echo 'unable to load script env, exit.' ; exit 1; }
 
 ## actual script starts form here
 
-if [[ ! $1 ]]; then
-    echo "Usage: $0 obs_spec [drivefit_options]"
-    exit 1
-fi
-dispatch_py \
-    --config ${scriptdir}/drivefit_config.d \
-    --data_lmt_path ${dataroot} \
-    --dataprod_path ${scratchdir} \
-    --tlaloc_etc_path ${tlalocetcdir} \
-    "$@"
+${pybindir}/python3 ${scriptdir}/dispatch_drivefit.py $@ --log_level DEBUG

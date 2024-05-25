@@ -1,1 +1,0 @@
-/home/toltec/toltec_astro_v2/kid_phase_fit/kid_phase_fit.py
