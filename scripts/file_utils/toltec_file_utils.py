@@ -124,6 +124,7 @@ class LmtToltecPathOption:
         parser: argparse.ArgumentParser,
         defaults=None,
         obs_spec_required=False,
+        obs_spec_multi=False,
     ):
         defaults = defaults or {}
 
@@ -135,7 +136,11 @@ class LmtToltecPathOption:
         cls.add_data_lmt_path_argument(parser, **_get_path_arg_kw("data_lmt_path"))
         cls.add_dataprod_path_argument(parser, **_get_path_arg_kw("dataprod_path"))
         cls.add_tlaloc_etc_path_argument(parser, **_get_path_arg_kw("tlaloc_etc_path"))
-        cls.add_obs_spec_argument(parser, required=obs_spec_required)
+        cls.add_obs_spec_argument(
+            parser,
+            required=obs_spec_required,
+            multi=obs_spec_multi,
+        )
 
     _default_paths: ClassVar = {
         "data_lmt_path": "/data_lmt",
@@ -281,7 +286,7 @@ class LmtToltecPathOption:
             if isinstance(r, list):
                 r = guess_info_from_sources([resolve_symlink(f) for f in r])
             result.append(r)
-        result = pd.concat(result) if result else None
+        result = pd.concat(result, ignore_index=True) if result else None
         n_files = 0 if result is None else len(result)
         if n_files > 0:
             logger.debug(
