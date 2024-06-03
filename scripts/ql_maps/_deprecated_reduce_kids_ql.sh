@@ -28,7 +28,7 @@ sleep 20
 ${pybindir}/python3 ${scriptdir}/reduce_kids_ql.py ${filepaths} \
     --output_dir ${output_dir} --log_level DEBUG \
     --search_paths ${dataroot}/toltec_clip{a,o}/reduced \
-    --data_lmt_root ${dataroot} > ${scriptdir}/reduce_kids_ql.log
+    --data_lmt_root ${dataroot} >> ${scriptdir}/reduce_kids_ql.log  2>&1
 
 set +x
 
