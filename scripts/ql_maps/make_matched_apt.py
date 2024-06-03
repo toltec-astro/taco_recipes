@@ -131,7 +131,13 @@ def _get_tune_obsnum(data_rootpath, obsnum):
         raise ValueError("unable to locate data file")
     with BasicObsData(files[0]).open() as bod:
         tune_obsnum = bod.meta['cal_obsnum']
-        logger.info(f"found {tune_obsnum=} for {obsnum=}")
+        if tune_obsnum == 99:
+            # this is to work around a bug in the ecsv header
+            if bod.meta["scannum"] == 2:
+                tune_obsnum = obsnum
+            else:
+                tune_obsnum = obsnum - 1
+        logger.info(f"found {tune_obsnum=} for {obsnum=} {bod}")
         return tune_obsnum
 
 

@@ -146,7 +146,7 @@ reduce:
             flux_calibration: # flux calibration
               enabled: true # enable or disable flux calibration
             extinction_correction: # extinction correction (per sample, tau for each band calculated from fit to atm models)
-              enabled: false # enable or disable extinction correction
+              enabled: true # enable or disable extinction correction
             flagging: # controls flagging before cleaning
               delta_f_min_Hz: 60.e3 # lower limit on frequency separation for flagging tones
               lower_weight_factor: 0.0 # flag detectors below this weight limit (ignored if 0, weight=1/variance of TOD)
