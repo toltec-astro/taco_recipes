@@ -17,7 +17,7 @@ ToltecRoachVnaSweep ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[1
 data = {"ts_len": 5}
 
 loop_items = []
-for a_sense in range(30, -1, -2):
+for a_sense in range(30, -1, -5):
     for a_drive in range(30, -1, -2):
         data["a_sense"] = a_sense
         data["a_drive"] = a_drive
