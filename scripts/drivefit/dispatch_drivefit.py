@@ -711,6 +711,7 @@ class DriveFitCommit(
             matched["f_chan_adrv"] = tbl_drivefit["f_chan"][ir]
             matched["amp_chan_adrv"] = tbl_drivefit["amp_chan"][ir]
             matched["adrv_best_adrv"] = tbl_drivefit["adrv_best"][ir]
+            matched["a_best_adrv"] = tbl_drivefit["a_best"][ir]
             Qr = matched["Qr_adrv"] = tbl_drivefit["Qr_best"][ir]
             rr = 0.5 / Qr
             xx = matched["dist"] / matched["ref"]
@@ -732,6 +733,7 @@ class DriveFitCommit(
             "d_phi",
             "idx_chan_adrv",
             "flag_adrv",
+            "a_best_adrv",
             "adrv_best_adrv",
             "f_chan_adrv",
             "amp_chan_adrv",
@@ -989,6 +991,144 @@ def run_drivefit_pipeline(
     return 1, locals()
 
 
+def run_drivefit_quicklook(
+    rc: RuntimeContext,
+    ctxs: list[dict],
+):
+    n_ctxs = len(ctxs)
+    fig = PlotMixin.make_subplots(
+        n_rows=n_ctxs,
+        n_cols=4,
+        vertical_spacing=80 / 1200,
+        fig_layout=PlotMixin.fig_layout_default
+        | {
+            "showlegend": False,
+            "height": 1200,
+        },
+    )
+    for i, _ctx in enumerate(ctxs):
+        ctx = _ctx["ctx"]
+        if "matched" not in ctx:
+            continue
+        matched = ctx["matched"]
+        tbl_adrv = ctx["tbl_adrv"]
+        row = i + 1
+        a_panel_kw = {"row": row, "col": 1}
+        fr_panel_kw = {"row": row, "col": 2}
+        Qr_panel_kw = {"row": row, "col": 3}
+        match_density_panel_kw = {"row": row, "col": 4}
+
+        tbl_good = tbl_adrv[tbl_adrv["amp_flag"] == 0]
+        tbl_bad = tbl_adrv[tbl_adrv["amp_flag"] != 0]
+        c00, c100 = plotly.colors.sample_colorscale(
+            "rdylgn",
+            samplepoints=[0, 1],
+        )
+
+        # adrv hist
+        # adrv_bins = np.arange(
+        #     0, cfg.adrv_max + cfg.adrv_ref_step, cfg.adrv_ref_step,
+        # )
+        # adrv_centers = 0.5 * (adrv_bins[1:] + adrv_bins[:-1])
+        # a hist
+        a_bins = np.arange(-0.5, 1, 0.1)
+        a_centers = 0.5 * (a_bins[1:] + a_bins[:-1])
+        for t, name, color in [
+            (tbl_bad, "bad", c00),
+            (tbl_good, "good", c100),
+        ]:
+            fig.add_bar(
+                x=a_centers,
+                y=np.histogram(t["a_best_adrv"], bins=a_bins)[0],
+                marker={
+                    "color": color,
+                },
+                name=name,
+                **a_panel_kw,
+            )
+        roach = ctx["roach"]
+        fig.update_yaxes(
+            title=f"nw{roach}",
+            **a_panel_kw,
+        )
+        fig.update_xaxes(
+            title="Non-linearity",
+            **a_panel_kw,
+        )
+        fig.update_layout(barmode="stack")
+
+        for t, name, color in [
+            (tbl_bad, "bad", c00),
+            (tbl_good, "good", c100),
+        ]:
+            fig.add_scattergl(
+                x=t["f_chan"].to_value(u.MHz),
+                y=t["amp_best"],
+                mode="markers",
+                marker={
+                    "color": color,
+                },
+                name=name,
+                **fr_panel_kw,
+            )
+        fig.update_yaxes(
+            title="Amp Cor.",
+            **fr_panel_kw,
+        )
+        fig.update_xaxes(
+            title="f_chan (MHz)",
+            **fr_panel_kw,
+        )
+
+        for t, name, color in [
+            (tbl_bad, "bad", c00),
+            (tbl_good, "good", c100),
+        ]:
+            fig.add_scattergl(
+                x=t["Qr_adrv"],
+                y=t["amp_best"],
+                mode="markers",
+                marker={
+                    "color": color,
+                },
+                name=name,
+                **Qr_panel_kw,
+            )
+        fig.update_yaxes(
+            title="Amp Cor.",
+            **Qr_panel_kw,
+        )
+        fig.update_xaxes(
+            title="Qr",
+            **Qr_panel_kw,
+        )
+
+        matched.make_plotly_fig(
+            type="density",
+            fig=fig,
+            panel_kw=match_density_panel_kw,
+            label_ref="Ref Id (Drive Fit)",
+            label_query="Current Sweep Channel Id",
+        )
+        obsnum = ctx["obsnum"]
+        fig.update_layout(
+            title={
+                "text": f"DriveFit summary: {obsnum:d}",
+            },
+            margin={
+                "t": 100,
+                "b": 100,
+            },
+        )
+    obsnum = ctxs[0]["ctx"]["obsnum"]
+    save_path = ctxs[0]["ctx"]["plot_save_path"]
+    if not save_path.exists():
+        save_path.mkdir(parents=True)
+    save_name = f"ql_{obsnum:06d}_drivefit_commit.html"
+    FileStoreConfigMixin.save_plotly_fig(save_path.joinpath(save_name), fig)
+    return fig
+
+
 def _load_drivefit_data(
     tbl: SourceInfoDataFrame, drivefit_output_search_paths: None | list
 ):
@@ -1060,6 +1200,7 @@ if __name__ == "__main__":
     drivefit_output_search_paths = [path_option.dataprod_path]
     with timeit("run drive fit pipeline"):
         report = []
+        ctxs = []
         for roach, stbl in tbl.groupby("roach", sort=False):
             logger.debug(f"{roach=} n_files={len(stbl)}")
             r, ctx = run_drivefit_pipeline(
@@ -1073,6 +1214,10 @@ if __name__ == "__main__":
                     "message": ctx.get("message", None),
                 }
             )
+            ctxs.append(ctx)
+    if option.save_plot:
+        with timeit("generate drive fit quicklook"):
+            run_drivefit_quicklook(rc, ctxs)
     report = pd.DataFrame.from_records(report)
     logger.info(f"run status:\n{report}")
     n_failed = np.sum(report["returncode"] != 0)
