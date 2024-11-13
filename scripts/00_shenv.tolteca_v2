@@ -3,7 +3,7 @@
 scriptdir=$(dirname "$(readlink -f "$0")")
 
 if [[ ! -e ${toltec_astro_repo_root} ]]; then
-    toltec_astro_repo_root=${HOME}/toltec_astro_v2
+    toltec_astro_repo_root=${HOME}/toltec_astro
 fi
 
 ## directories
