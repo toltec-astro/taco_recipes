@@ -748,7 +748,10 @@ class DriveFitCommit(
         tbl_adrv["adrv_best"] = ctx_ampcor["adrv_filled"]
         tbl_adrv["amp_best"] = ctx_ampcor["ampcor"]
         tbl_adrv["amp_flag"] = ~ctx_ampcor["m_good"]
+        tbl_adrv.meta.clear()
+        tbl_adrv.meta.update(tbl_drivefit.meta)
         tbl_adrv.meta["atten_drive_global"] = ctx_ampcor["adrv_ref_total"]
+
 
         obsnum = swp.meta["obsnum"]
         roach = swp.meta["roach"]
@@ -929,7 +932,14 @@ class DriveFitCommit(
         return fig
 
     def save_drivefit_commit(self, ctx):
-        pass
+        """Save drivefit commit result."""
+        output_path = ctx["output_path"]
+        obsnum = ctx["obsnum"]
+        save_path = output_path.joinpath(f"{obsnum}")
+        save_name = Path(ctx["tbl"]["filepath"].iloc[0]).stem + "_adrv_commit.ecsv"
+        FileStoreConfigMixin.save_table(
+            save_path.joinpath(save_name), ctx["tbl_adrv"]
+        )
 
 
 def _run(
@@ -1164,6 +1174,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", default="tolteca.yaml")
     parser.add_argument("--log_level", default="INFO", help="The log level.")
     parser.add_argument("--save_plot", action="store_true", help="Save plots.")
+    parser.add_argument("--select", default=None, help="Select input data.")
     LmtToltecPathOption.add_args_to_parser(
         parser, obs_spec_required=True, obs_spec_multi=True
     )
@@ -1179,6 +1190,9 @@ if __name__ == "__main__":
     path_option = LmtToltecPathOption(option)
 
     tbl = path_option.get_raw_obs_info_table(raise_on_empty=True).sort_values("roach")
+    if option.select is not None:
+        with tbl.toltec_file.open() as fo:
+            tbl = fo.query(option.select)
     drivefit_cli_args[:0] = [
         "--drivefit.output_path",
         path_option.dataprod_path,

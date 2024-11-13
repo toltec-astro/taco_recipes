@@ -51,6 +51,6 @@ function dispatch_py {
     callername=$(basename ${callerpath})
     pyfile=${callerdir}/${callername%.*}.py
     set -x
-    ${pybindir}/python3 ${pyfile} $@
+    ${pybindir}/python3 ${pyfile} "$@"
     set +x
 }
