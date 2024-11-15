@@ -5,7 +5,7 @@
         d21_snr_min: 10
         snr_min: 5
         peak_db_min: 0.1
-- enable_if: true  ## window closed settings
+- enabled: true  # window closed settings
   source:
     kids:
       kids_find:
