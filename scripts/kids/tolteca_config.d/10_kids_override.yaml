@@ -11,7 +11,7 @@
       kids_find:
         d21_snr_min: 10
         snr_min: 5
-        peak_db_min: 1.
+        peak_db_min: 0.5
 - enable_if: file_suffix=="vnasweep"
   source:
     kids:
