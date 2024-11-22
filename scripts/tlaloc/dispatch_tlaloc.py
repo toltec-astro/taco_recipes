@@ -51,7 +51,38 @@ def run_tolteca_kids(
 drivefit_script_dir = taco_recipe_script_dir.joinpath("drivefit")
 
 
-def run_drivefit(tbl):
+def run_drivefit(
+    mode,
+    obs_spec,
+    unparsed_args,
+    data_lmt_path,
+    etc_path,
+    log_level="INFO",
+    **kwargs,
+):
+    output_path = data_lmt_path.joinpath("toltec/reduced")
+    cmd = (
+        [
+            "bash",
+            drivefit_script_dir.joinpath("dispatch_drivefit.sh"),
+            "--log_level",
+            log_level,
+            "--data_lmt_path",
+            data_lmt_path,
+            "--tlaloc_etc_path",
+            etc_path,
+            "--dataprod_path",
+            output_path,
+            "--mode",
+            mode,
+        ]
+        + unparsed_args
+        + ["--", obs_spec]
+    )
+    return pty_run(cmd)
+
+
+def run_drivefit_old(tbl):
     returncodes = []
     for source_info in tbl.toltec_file.to_info_list():
         cmd = [
@@ -64,7 +95,7 @@ def run_drivefit(tbl):
     return np.sum(returncodes)
 
 
-def run_drivefit_commit(tbl, etc_dir="~/tlaloc/etc"):
+def run_drivefit_commit_old(tbl, etc_dir="~/tlaloc/etc"):
     if len(tbl) > 1:
         logger.error("drivefit commit for multiple files is not implemented yet.")
         return 1
@@ -136,11 +167,11 @@ class TlalocAction:
 
     @classmethod
     def drivefit_reduce(cls, *args, **kwargs):
-        return run_drivefit(*args, **kwargs)
+        return run_drivefit("drivefit", *args, **kwargs)
 
     @classmethod
     def drivefit_commit(cls, *args, **kwargs):
-        return run_drivefit_commit(*args, **kwargs)
+        return run_drivefit("drivefit_commit", *args, **kwargs)
 
     @classmethod
     def dry_run(cls, *args, **kwargs):

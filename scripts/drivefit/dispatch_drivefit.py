@@ -16,6 +16,7 @@ from pydantic import Field
 from tollan.config.types import AbsDirectoryPath
 from tollan.config.types import FrequencyQuantityField
 from tolteca_kids.filestore import FileStoreConfigMixin
+from tolteca_kids.roach_tone import TlalocEtcDataStore
 from tolteca_kids.plot import PlotMixin
 from tolteca_kids.match1d import Match1D, Match1DResult
 from tolteca_kidsproc.kidsdata import MultiSweep
@@ -672,6 +673,10 @@ class DriveFitCommitConfig(ConfigModel):
     output_path: AbsDirectoryPath = Field(
         description="Output path.",
     )
+    tlaloc_etc_path: None | AbsDirectoryPath = Field(
+        description="Tlaloc etc path.",
+    )
+
     save_plot: bool = Field(default=False, description="Save plots.")
 
 
@@ -751,7 +756,6 @@ class DriveFitCommit(
         tbl_adrv.meta.clear()
         tbl_adrv.meta.update(tbl_drivefit.meta)
         tbl_adrv.meta["atten_drive_global"] = ctx_ampcor["adrv_ref_total"]
-
 
         obsnum = swp.meta["obsnum"]
         roach = swp.meta["roach"]
@@ -839,7 +843,7 @@ class DriveFitCommit(
                 "height": 1200,
             },
         )
-        a_panel_kw = {"row": 1, "col": 1}
+        # a_panel_kw = {"row": 1, "col": 1}
         fr_panel_kw = {"row": 2, "col": 1}
         Qr_panel_kw = {"row": 3, "col": 1}
         match_panel_kw = {"row": 4, "col": 1}
@@ -937,9 +941,18 @@ class DriveFitCommit(
         obsnum = ctx["obsnum"]
         save_path = output_path.joinpath(f"{obsnum}")
         save_name = Path(ctx["tbl"]["filepath"].iloc[0]).stem + "_adrv_commit.ecsv"
-        FileStoreConfigMixin.save_table(
-            save_path.joinpath(save_name), ctx["tbl_adrv"]
-        )
+        tbl_adrv = ctx["tbl_adrv"]
+        FileStoreConfigMixin.save_table(save_path.joinpath(save_name), tbl_adrv)
+
+        tlaloc_etc_path = self.config.tlaloc_etc_path
+        if tlaloc_etc_path is None:
+            return
+        tlaloc_etc = TlalocEtcDataStore(tlaloc_etc_path)
+        roach = ctx["roach"]
+        tbl_amp = QTable({"amp_tone": tbl_adrv["amp_best"]})
+        tbl_amp.meta["roach"] = roach
+        tlaloc_etc.write_targ_amps_table(tbl_amp)
+        tlaloc_etc.write_atten_drive_value(roach, tbl_adrv.meta["atten_drive_global"])
 
 
 def _run(
@@ -975,18 +988,16 @@ def run_drivefit_pipeline(
     rc: RuntimeContext,
     tbl: SourceInfoDataFrame,
     drivefit_output_search_paths: None | list = None,
+    mode: Literal["auto", "drivefit", "drivefit_commit"] = "auto",
 ):
     tbl = _validate_inputs(tbl)
     adrvs = np.unique(tbl[_adrv_meta_key])
     n_adrvs = len(adrvs)
-    if n_adrvs > 1:
-        # run drivefit
-        logger.info("found multiple atten_drives, run drive fit")
+
+    def _run_drivefit(tbl):
         return _run(rc, tbl, "drive fit", DriveFit)
-    if len(tbl) == 1:
-        logger.info(
-            "found single sweep, run drive fit commit with previous drive fit data"
-        )
+
+    def _run_drivefit_commit(tbl):
         tbl_drivefit = _load_drivefit_data(
             tbl, drivefit_output_search_paths=drivefit_output_search_paths
         )
@@ -997,6 +1008,27 @@ def run_drivefit_pipeline(
             DriveFitCommit,
             step_kw={"tbl_drivefit": tbl_drivefit},
         )
+
+    if n_adrvs > 1:
+        # run drivefit
+        if mode in ["auto", "drivefit"]:
+            logger.info("found multiple atten_drives, run drive fit")
+            return _run_drivefit(tbl)
+        if mode == "drivefit_commit":
+            adrv0 = adrvs[0]
+            tbl = tbl.query(f"atten_drive == {adrv0}")
+            logger.info(
+                f"found multiple atten_drives, run {mode=} with first adrv={adrv0}"
+            )
+            return _run_drivefit_commit(tbl)
+    if len(tbl) == 1:
+        if mode in ["auto", "drivefit_commit"]:
+            logger.info(
+                "found single sweep, run drive fit commit with previous drive fit data"
+            )
+            return _run_drivefit_commit(tbl)
+        if mode == "drivefit":
+            logger.error(f"found single sweep, unable to run {mode=}")
     message = "invalid input for drive fit pipeline"
     return 1, locals()
 
@@ -1175,6 +1207,7 @@ if __name__ == "__main__":
     parser.add_argument("--log_level", default="INFO", help="The log level.")
     parser.add_argument("--save_plot", action="store_true", help="Save plots.")
     parser.add_argument("--select", default=None, help="Select input data.")
+    parser.add_argument("--mode", choices=["auto", "drivefit", "drivefit_commit"])
     LmtToltecPathOption.add_args_to_parser(
         parser, obs_spec_required=True, obs_spec_multi=True
     )
@@ -1207,6 +1240,10 @@ if __name__ == "__main__":
                 "--drivefit_commit.save_plot",
             ],
         )
+    if option.tlaloc_etc_path is not None:
+        drivefit_cli_args.extend(
+            ["--drivefit_commit.tlaloc_etc_path", option.tlaloc_etc_path]
+        )
     rc = RuntimeContext(option.config)
     rc.config_backend.update_override_config(dict_from_cli_args(drivefit_cli_args))
     logger.info(f"{pformat_yaml(rc.config.model_dump())}")
@@ -1218,7 +1255,10 @@ if __name__ == "__main__":
         for roach, stbl in tbl.groupby("roach", sort=False):
             logger.debug(f"{roach=} n_files={len(stbl)}")
             r, ctx = run_drivefit_pipeline(
-                rc, stbl, drivefit_output_search_paths=drivefit_output_search_paths
+                rc,
+                stbl,
+                drivefit_output_search_paths=drivefit_output_search_paths,
+                mode=option.mode,
             )
             report.append(
                 {
