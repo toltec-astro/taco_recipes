@@ -142,26 +142,7 @@ if [[ ${type} == "vna" ]]; then
             --output_processed ${scratchdir}/'{stem}_processed.nc' \
             --output "${reportfile}" \
                 "${file}" ${args}
-        if [[ $outfile ]]; then
-            set -x
-            ${pyexec} ${scriptdir}/fix_lo.py ${file} "${reportfile}" "${outfile}"
-            set +x
-        fi
-        # bash ${scriptdir}/reduce_sweep.sh $(readlink -f ${file})
-        # build the refdata
-        # bash ${scriptdir}/reduce_vna.sh $(readlink -f ${file})
-        # ${pyexec_v1} ${scriptdir}/make_ref_data.py ${file} ${reportfile}
-        # ref_file=${reportfile%.*}.refdata
-        # ln -sf ${ref_file} ${scratchdir}/toltec${nw}_vnasweep.refdata
-        # if [[ $outfile ]]; then
-        #     # ${pyexec} ${scriptdir}/fix_lo.py ${file} "${reportfile}" "${outfile}"
-        #     # the targ freqs.txt is compatible to what ICS expect.
-        #     targ_freqs_file=${reportfile%.*}_targfreqs.dat
-        #     cp ${targ_freqs_file} "${outfile}"
-        #     ampcor_file=${reportfile%.*}_ampcor.dat
-        #     etcdir=$(dirname ${outfile})
-        #     cp ${ampcor_file} "${etcdir}/default_targ_amps.dat"
-        # fi
+        cp ${reportfile} ${reportfile}.kidscpp_v0
     elif [[ ${runmode} == "plot" ]]; then
 	echo "not implemented!"
 	exit 1
@@ -181,32 +162,7 @@ elif [[ ${type} == "targ" ]]; then
            ${fitter_args[@]} \
            --output_processed ${scratchdir}/'{stem}_processed.nc' \
            --output "${reportfile}"  "${file}" ${args}
-        if [[ $outfile ]]; then
-            set -x
-            ${pyexec} ${scriptdir}/fix_lo.py ${file} "${reportfile}" "${outfile}"
-
-        fi
         cp ${reportfile} ${reportfile}.kidscpp_v0
-        # run the new reduce tune to generate all tables
-        # bash ${scriptdir}/reduce_sweep.sh $(readlink -f ${file})
-        # if [[ $outfile ]]; then
-        #     # if (( ${upload_tones} == 0 )); then
-        #     #     echo "skip upload tones during TUNE."
-        #     #     # this update the header so they are properly propagated
-        #     #     # ${pyexec} ${scriptdir}/skip_upload_tones.py ${file} "${outfile}"
-        #     #     # this enables the kidscpp tones
-        #     #     # ${pyexec} ${scriptdir}/fix_lo.py ${file} "${reportfile}" "${outfile}"
-        #     # else
-        #     #     # ${pyexec} ${scriptdir}/fix_lo.py ${file} "${reportfile}" "${outfile}"
-        #     #     # the targ freqs.txt is compatible to what ICS expect.
-        #     #     targ_freqs_file=${reportfile%.*}_targfreqs.dat
-        #     #     cp ${targ_freqs_file} "${outfile}"
-        #     #     ampcor_file=${reportfile%.*}_ampcor.dat
-        #     #     etcdir=$(dirname ${outfile})
-        #     #     cp ${ampcor_file} "${etcdir}/default_targ_amps.dat"
-        #     #     echo "updated ${etcdir} with targ freqs and amps"
-        #     # fi
-        # fi
     elif [[ ${runmode} == "plot" ]]; then
         ${pyexec} ${kidspydir}/kidsvis.py ${file} --fitreport "${reportfile}" --use_derotate ${args} --grid 8 8 &
     elif [[ ${runmode} == "fg" ]]; then
