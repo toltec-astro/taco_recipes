@@ -5,5 +5,4 @@ ObsGoal Dcs;  Dcs  -ObsGoal Engineering
 Toltec
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0
-ToltecRoachSampleFreqSet ToltecBackend;  ToltecBackend  -RoachArg[0] 488 -RoachCmd samplefreq_set -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
-SkyDip -DipMode  StepAndVnaSweep -ElStart 70 -ElEnd 20 -ElVel 0 -ElStep 11ß -SampleTime 30
+SkyDip -DipMode  StepAndVnaSweep -ElStart 70 -ElEnd 20 -ElVel 0 -ElStep -5 -SampleTime 30
