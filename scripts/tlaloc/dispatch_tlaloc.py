@@ -75,6 +75,8 @@ def run_drivefit(
             output_path,
             "--mode",
             mode,
+            "--select",
+            "file_suffix=='targsweep'",
         ]
         + unparsed_args
         + ["--", obs_spec]
@@ -236,10 +238,22 @@ if __name__ == "__main__":
     reset_logger(level=option.log_level)
     logger.debug(f"parsed options: {option}")
 
+    # here we need to expand the obsspec so they collect all files for
+    # the obsnum
+    if option.action == "drivefit_reduce":
+        path_option = LmtToltecPathOption(option)
+        tbl = path_option.get_raw_obs_info_table(raise_on_empty=True)
+        entry = next(tbl.itertuples())
+        obs_spec = f"{entry.obsnum}/{entry.roach}" 
+        logger.info(f"resolved obsspec for drivefit {option.obs_spec} -> {obs_spec}")
+    else:
+        obs_spec = option.obs_spec
+
+
     sys.exit(
         TlalocAction.run(
             option.action,
-            option.obs_spec,
+            obs_spec,
             unparsed_args=unparsed_args,
             data_lmt_path=option.data_lmt_path,
             etc_path=option.etc_path,

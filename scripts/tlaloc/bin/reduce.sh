@@ -52,18 +52,19 @@ fi
 echo "use scratch ${scratchdir}"
 
 # dispatch drive fit
-dispatch_drivefit_bin=${HOME}/taco_scripts/drivefit/dispatch_drivefit.sh
+
+dispatch_tlaloc_bin=${scriptdir}/../dispatch_tlaloc.sh
 if [[ ${action} =~ "drivefit_reduce" ]]; then
     echo "run drive fit reduce"
     set -x
-    ${dispatch_drivefit_bin} ${file} --action ${action} --output ${outfile} --log_level DEBUG
+    bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc --action ${action} 2>&1
     set +x
     exit 0
 fi
 if [[ ${action} =~ "drivefit_commit" ]]; then
     echo "run drive fit commit"
     set -x
-    ${dispatch_drivefit_bin} ${file} --action ${action} --output ${outfile} --log_level DEBUG
+    bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc --action ${action} 2>&1
     set +x
     exit 0
 fi
