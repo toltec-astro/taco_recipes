@@ -988,8 +988,9 @@ def run_drivefit_pipeline(
     rc: RuntimeContext,
     tbl: SourceInfoDataFrame,
     drivefit_output_search_paths: None | list = None,
-    mode: Literal["auto", "drivefit", "drivefit_commit"] = "auto",
+    mode: Literal[None, "auto", "drivefit", "drivefit_commit"] = "auto",
 ):
+    mode = mode or "auto"
     tbl = _validate_inputs(tbl)
     adrvs = np.unique(tbl[_adrv_meta_key])
     n_adrvs = len(adrvs)
@@ -998,15 +999,17 @@ def run_drivefit_pipeline(
         return _run(rc, tbl, "drive fit", DriveFit)
 
     def _run_drivefit_commit(tbl):
-        tbl_drivefit = _load_drivefit_data(
+        returncode_drivefit, ctx_drivefit = _load_drivefit_data(
             tbl, drivefit_output_search_paths=drivefit_output_search_paths
         )
+        if returncode_drivefit != 0:
+            return returncode_drivefit, ctx_drivefit
         return _run(
             rc,
             tbl,
             "drive fit commit",
             DriveFitCommit,
-            step_kw={"tbl_drivefit": tbl_drivefit},
+            step_kw={"tbl_drivefit": ctx_drivefit["tbl_drivefit"]},
         )
 
     if n_adrvs > 1:
@@ -1021,7 +1024,8 @@ def run_drivefit_pipeline(
                 f"found multiple atten_drives, run {mode=} with first adrv={adrv0}"
             )
             return _run_drivefit_commit(tbl)
-    if len(tbl) == 1:
+        message = f"invalid mode {mode=}"
+    elif n_adrvs == 1:
         if mode in ["auto", "drivefit_commit"]:
             logger.info(
                 "found single sweep, run drive fit commit with previous drive fit data"
@@ -1029,7 +1033,9 @@ def run_drivefit_pipeline(
             return _run_drivefit_commit(tbl)
         if mode == "drivefit":
             logger.error(f"found single sweep, unable to run {mode=}")
-    message = "invalid input for drive fit pipeline"
+        message = f"invalid mode {mode=}"
+    else:
+        message = "invalid input for drive fit pipeline"
     return 1, locals()
 
 
@@ -1045,7 +1051,7 @@ def run_drivefit_quicklook(
         fig_layout=PlotMixin.fig_layout_default
         | {
             "showlegend": False,
-            "height": 1200,
+            "height": 2000,
         },
     )
     for i, _ctx in enumerate(ctxs):
@@ -1089,8 +1095,9 @@ def run_drivefit_quicklook(
                 **a_panel_kw,
             )
         roach = ctx["roach"]
+        adrv_global = tbl_adrv.meta["atten_drive_global"]
         fig.update_yaxes(
-            title=f"nw{roach}",
+            title=f"nw{roach} {adrv_global}",
             **a_panel_kw,
         )
         fig.update_xaxes(
@@ -1175,15 +1182,19 @@ def _load_drivefit_data(
     tbl: SourceInfoDataFrame, drivefit_output_search_paths: None | list
 ):
     swp: MultiSweep = tbl.toltec_file.read().toltec_file.data_objs.iloc[0]
-    logger.debug(f"locate drivefit data for {swp}")
+    logger.debug(f"locate drivefit data for {swp.meta["uid_raw_obs_file"]}")
     roach = swp.meta["roach"]
     file_timestamp = swp.meta["file_timestamp"]
     drivefit_files = []
     for p in drivefit_output_search_paths or []:
         drivefit_files.extend(p.glob(f"*/toltec{roach}_*_*_adrv.ecsv"))
 
+    if not drivefit_files:
+        message = f"no drivefit data found for {swp.meta["uid_raw_obs_file"]}"
+        logger.error(message)
+        return 1, locals()
     tbl_drivefit_files = guess_info_from_sources(drivefit_files)
-    logger.debug(f"found drive fit files:\n{tbl_drivefit_files.toltec_file.pformat()}")
+    logger.debug(f"found drivefit files:\n{tbl_drivefit_files.toltec_file.pformat()}")
     i_closest = np.argmin(
         np.abs(tbl_drivefit_files["file_timestamp"] - file_timestamp)
     ).item()
@@ -1192,7 +1203,7 @@ def _load_drivefit_data(
     tbl_drivefit = QTable.read(tbl_drivefit_file, format="ascii.ecsv")
     logger.info(f"use drivefit table: {tbl_drivefit_file}")
     logger.debug(f"drivefit table:\n{tbl_drivefit}")
-    return tbl_drivefit
+    return 0, locals()
 
 
 if __name__ == "__main__":
@@ -1207,12 +1218,14 @@ if __name__ == "__main__":
     parser.add_argument("--log_level", default="INFO", help="The log level.")
     parser.add_argument("--save_plot", action="store_true", help="Save plots.")
     parser.add_argument("--select", default=None, help="Select input data.")
-    parser.add_argument("--mode", choices=["auto", "drivefit", "drivefit_commit"])
+    parser.add_argument(
+        "--mode", choices=["auto", "drivefit", "drivefit_commit"], default="auto"
+    )
     LmtToltecPathOption.add_args_to_parser(
         parser, obs_spec_required=True, obs_spec_multi=True
     )
 
-    drivefit_cli_args, args = split_cli_args("^drivefit(_commit)?\..+", sys.argv[1:])
+    drivefit_cli_args, args = split_cli_args(r"^drivefit(_commit)?\..+", sys.argv[1:])
     logger.debug(
         f"drivefit_cli_args:\n{pformat_yaml(drivefit_cli_args)}\n"
         f"other_args:\n{pformat_yaml(args)}",
