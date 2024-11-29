@@ -1,4 +1,4 @@
-#ObservingScript -Name  "00_scripts/01_general_scripts/02_easy_focus_scripts/coarse_start_minus2_end_4.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
+#ObservingScript -Name  "GitHub/taco_recipes/observing_scripts/01_general_scripts/02_easy_focus_scripts/coarse_start_minus1p5_end_0.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
 ProposalInfo Dcs;  Dcs  -ProjectId 2024_Tol_SRO
 ObsGoal Dcs;  Dcs  -ObsGoal Focus
@@ -7,8 +7,8 @@ ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort
 TelescopeBackend -IncludeSignal  0
 Tune Cal;  Cal  -CalMode Tune
 ToltecTuneFlag null;  ToltecBackend  -NeedsTune 0
-M2OffsetsZ M2;  M2  -ZDelta 0 -ZReq -1.5
-#Sleep -sec  2
+M2OffsetsZ M2;  M2  -TiltDelta 0 -TipDelta 0 -XDelta 0 -YDelta 0 -ZDelta 0 -ZReq -1.50
+#Sleep -sec  1
 Loop -loop_name  Loop -loop_repeat 3 -loop_when EndOfLoop
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
 M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta 0.50
