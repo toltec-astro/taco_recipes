@@ -86,7 +86,7 @@ def get_obs_goal(lmt_fs, info: SourceInfoModel):
     tel_info_tbl = get_lmt_info_table_from_toltec_info(
         lmt_fs, info, query="interface == 'tel_toltec'"
     )
-    if len(tel_info_tbl) == 0:
+    if tel_info_tbl is None or len(tel_info_tbl) == 0:
         logger.error("no tel data found.")
         return None
     if len(tel_info_tbl) > 1:
