@@ -12,8 +12,8 @@ from tollan.utils.log import get_logger, init_log
 from toltecpipe_status import has_run_for_obsnum, get_client
 
 
-DATA_LMT_ROOT = "/home/toltec/toltec_astro_v2/run/data_lmt"
-DATAPROD_ROOT = "/home/toltec/toltec_astro_v2/run/dataprod_toltec"
+DATA_LMT_ROOT = "/home/toltec/toltec_astro/run/data_lmt"
+DATAPROD_ROOT = "/home/toltec/toltec_astro/run/dataprod_toltec"
 
 QL_SEARCH_PATHS = [
         # '/home/toltec/work_toltec/220708/redu/focus/focus3',
