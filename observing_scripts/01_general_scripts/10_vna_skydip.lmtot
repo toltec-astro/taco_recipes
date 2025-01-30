@@ -2,6 +2,7 @@
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
 ProposalInfo Dcs;  Dcs  -ProjectId 2024_TolTEC_Commissioning
 ObsGoal Dcs;  Dcs  -ObsGoal Engineering
+Stay Telescope; Telescope -Stay Stay
 Toltec
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0

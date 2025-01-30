@@ -1,6 +1,6 @@
 #ObservingScript -Name  "GitHub/taco_recipes/observing_scripts/01_general_scripts/03_standard_astigmatism.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2024-S1-TolTEC-COM
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
 ObsGoal Dcs;  Dcs  -ObsGoal Astigmatism
 Toltec
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
