@@ -20,8 +20,8 @@ function file_utils_py_call {
         --data_lmt_path=${dataroot}
 }
 
-commondir=$HOME/toltec_astro_v2/run/tolteca/common
-rcdir=$HOME/toltec_astro_v2/run/tolteca/pointing
+commondir=$HOME/toltec_astro/run/tolteca/common
+rcdir=$HOME/toltec_astro/run/tolteca/pointing
 
 if [[ ! $1 ]]; then
     obsnum=$(file_utils_py_call obsnum)
@@ -72,7 +72,7 @@ ln -sf ${apt_matched_file} ${rcdir}/data/${apt_filename}
 # run tolteca reduce
 time $toltecaexec -d ${rcdir} -g -- reduce --jobkey reduced/${obsnum} \
     --inputs.0.select "obsnum == ${obsnum} & (scannum == ${scannum})" \
-    --steps.0.path ~/toltec_astro_v2/citlali/build_2/bin/citlali
+    --steps.0.path ~/toltec_astro/citlali/build/bin/citlali
 # $toltecaexec -g -d ${rcdir} -- reduce --jobkey reduced/${obsnum} --inputs.0.select "(obsnum == ${obsnum}) & (scannum == ${scannum}) & (interface != \"toltec0\") & (interface != \"toltec6\")"
 # & (interface != \"toltec4\") & (interface != \"toltec6\") " #& (interface != \"toltec2\") & (interface != \"toltec3\") " #& (interface != \"toltec1\") & (interface != \"toltec4\") & (interface != \"toltec6\")"
 
