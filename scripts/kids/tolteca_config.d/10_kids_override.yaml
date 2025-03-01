@@ -5,6 +5,7 @@
         d21_snr_min: 10
         snr_min: 5
         peak_db_min: 0.1
+        select: "height_db > 1 | Qr < 25000"
 - enable_if: roach<7  # window closed settings for clipa networks
   source:
     kids:
