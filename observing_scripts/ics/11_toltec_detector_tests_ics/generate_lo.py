@@ -5,6 +5,7 @@ ToltecRoachVnaLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] LUT -Roac
 ToltecRoachVnaLoad ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd vna_load
 ToltecSubObsNumMode ToltecBackend;  ToltecBackend  -RoachCmd null -SubObsMode 1
 {loop_items}
+ToltecRoachLoSetOffset ToltecBackend;  ToltecBackend  -RoachArg[0] 0 -RoachCmd lo_set_offset -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
 ToltecObsNumMode ToltecBackend;  ToltecBackend  -RoachCmd null -SubObsMode 0
 """
 loop_item_template = """
