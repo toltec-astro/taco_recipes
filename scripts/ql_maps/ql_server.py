@@ -111,10 +111,8 @@ def _vstack_images_0(files):
     return new_image
 
 
-def _vstack_images(files):
+def _vstack_images_impl(images):
     from PIL import Image
-    images = [Image.open(file) for file in files if file.name.endswith('.png')]
-
     widths, heights = zip(*(i.size for i in images))
     max_width = max(widths)
     total_height = 0
@@ -131,9 +129,14 @@ def _vstack_images(files):
     return new_image
 
 
-def _hstack_images(files):
+def _vstack_images(files):
     from PIL import Image
     images = [Image.open(file) for file in files if file.name.endswith('.png')]
+    return _vstack_images_impl(images)
+
+
+def _hstack_images_impl(images):
+    from PIL import Image
 
     total_width = sum(image.size[0] for image in images)
     max_height = max(image.size[1] for image in images)
@@ -146,6 +149,28 @@ def _hstack_images(files):
         new_image.paste(image, (x_offset, 0))
         x_offset += image.size[0]
     return new_image
+
+
+def _hstack_images_0(files):
+    from PIL import Image
+    images = [Image.open(file) for file in files if file.name.endswith('.png')]
+    return _hstack_images_impl(images)
+
+
+def _hstack_images(files):
+    from PIL import Image
+    files = [file for file in files if file.name.endswith('.png')]
+    images = [Image.open(file) for file in files if file.name.endswith('.png')]
+
+    kids_file_index = [i for i, f in enumerate(files) if f.name.endswith("kidsinfo.png")]
+    if not kids_file_index:
+        return _hstack_images_impl(images)
+    kids_image = images.pop(kids_file_index[0])
+    images = [
+            kids_image,
+            _hstack_images_impl(images)
+            ] 
+    return _vstack_images_impl(images)
 
 
 
