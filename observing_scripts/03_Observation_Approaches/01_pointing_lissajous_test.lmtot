@@ -1,0 +1,15 @@
+#ObservingScript -Name  "00_scripts/03_Observation_Approaches/01_pointing_lissajous_test.lmtot" -Author "lmtmc" -Date "Mon Apr 23 03:31:16 UTC 2018"
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_TolTEC_Commissioning
+ObsGoal Dcs;  Dcs  -ObsGoal Calibration
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Tune Cal;  Cal  -CalMode Tune
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 10 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 0.5 -YLength 0.5 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 20 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 0.5 -YLength 0.5 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 10 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 0.66 -YLength 0.66 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 20 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 0.66 -YLength 0.66 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 20 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 0.75 -YLength 0.75 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 20 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 0.75 -YLength 0.75 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
