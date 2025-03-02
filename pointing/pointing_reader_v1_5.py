@@ -233,7 +233,8 @@ if __name__ == '__main__':
             
             #im = axi.imshow(img[img.index_of(args.images[ci])].data)
             gaussian_kernel = Gaussian2DKernel(x_stddev=1.0, y_stddev=1.0)
-            convolved_image = convolve(cutout.data, gaussian_kernel)
+            # convolved_image = convolve(cutout.data, gaussian_kernel)
+            convolved_image = cutout.data  # no convolve
             im = axi.imshow(convolved_image)
 
             index_flat = np.argmax(convolved_image)
