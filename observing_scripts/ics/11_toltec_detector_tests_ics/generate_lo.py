@@ -16,7 +16,8 @@ ToltecRoachVnaSweep ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[1
 data = {}
 
 loop_items = []
-for lo_offset_kHz in range(-1000, 1000 + 1, 200):
+# for lo_offset_kHz in range(-1000, 1000 + 1, 200):
+for lo_offset_kHz in range(-10000, 10000 + 1, 2000):
     data["lo_offset_Hz"] = lo_offset_kHz * 1000
     loop_items.append(loop_item_template.format(**data).strip())
 
