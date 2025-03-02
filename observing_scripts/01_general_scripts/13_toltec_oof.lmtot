@@ -1,0 +1,15 @@
+#ObservingScript -Name  "00_scripts/01_general_scripts/13_toltec_oof.lmtot" -Author "lmtmc" -Date "Mon Apr 23 03:31:16 UTC 2018"
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
+ObsGoal Dcs;  Dcs  -ObsGoal Oof
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Tune Cal;  Cal  -CalMode Tune
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 0
+M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta -1.00
+Loop -loop_name  Loop -loop_repeat 3 -loop_when EndOfLoop
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta 1.00
+endLoop
+M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta -2.00
