@@ -240,7 +240,7 @@ if __name__ == '__main__':
             peak_index = np.unravel_index(index_flat, convolved_image.shape)
             row_start, col_start = peak_index
 
-            print(row_start,col_start)
+            print(f"{cx=} {cy=} {x=} {y=} {peak_index=}")
 
             fit_g = fitting.LevMarLSQFitter()
 
@@ -248,33 +248,42 @@ if __name__ == '__main__':
             print(convolved_image.shape)
 
 
-            #x = range(-convolved_image.shape[1]//2, convolved_image.shape[1]//2+1)#, convolved_image.shape[1])
-            #y = range(-convolved_image.shape[0]//2, convolved_image.shape[0]//2+1)#, convolved_image.shape[0])
+            # x = range(-convolved_image.shape[1]//2, convolved_image.shape[1]//2)#, convolved_image.shape[1])
+            # y = range(-convolved_image.shape[0]//2, convolved_image.shape[0]//2)#, convolved_image.shape[0])
 
-            x = range(-50,51)
-            y = range(-50,51)
-            
+            # x = range(-50,51)
+            # y = range(-50,51)
+
+            y, x = np.indices(convolved_image.shape, dtype=float)
+            x, y = cutout.wcs.all_pix2world(x, y, 0)
 
             print(x,y)
 
-            row_start = y[row_start]
-            col_start = x[col_start]
+            x0, y0 = cutout.wcs.all_pix2world(col_start, row_start, 0)
 
-            x, y = np.meshgrid(x, y)
+            print(x0, y0)
 
-            g_init = models.Gaussian2D(amplitude=np.max(convolved_image), x_mean=col_start, y_mean=row_start, x_stddev=5, y_stddev=5)
+            # row_start = y[row_start]
+            # col_start = x[col_start]
+
+            # x, y = np.meshgrid(x, y)
+
+            g_init = models.Gaussian2D(
+                    amplitude=np.max(convolved_image),
+                    x_mean=x0,
+                    y_mean=y0, x_stddev=5, y_stddev=5)
 
             g = fit_g(g_init, x, y, convolved_image)
 
             table['amp'][i] = g.amplitude.value
-            table['x_t'][i] = -g.x_mean.value - 1
-            table['y_t'][i] = g.y_mean.value + 1
+            table['x_t'][i] = g.x_mean.value
+            table['y_t'][i] = g.y_mean.value
             table['a_fwhm'][i] = g.x_stddev.value/fwhm_to_sigma
             table['b_fwhm'][i] = g.y_stddev.value/fwhm_to_sigma
             
             ppt_dict['amp']['value'] = g.amplitude.value
-            ppt_dict['x_t']['value'] = -g.x_mean.value - 1
-            ppt_dict['y_t']['value'] = g.y_mean.value + 1
+            ppt_dict['x_t']['value'] = g.x_mean.value
+            ppt_dict['y_t']['value'] = g.y_mean.value
             ppt_dict['a_fwhm']['value'] = g.x_stddev.value/fwhm_to_sigma
             ppt_dict['b_fwhm']['value'] = g.y_stddev.value/fwhm_to_sigma
 
@@ -321,14 +330,14 @@ if __name__ == '__main__':
 
 
 
-            sky = cutout.wcs.all_world2pix(-g.x_mean.value-1, g.y_mean.value+1,0)
+            sky = cutout.wcs.all_world2pix(g.x_mean.value, g.y_mean.value,0)
 
             axi.axvline(sky[0],c='w',linestyle='--',alpha=0.5)
             axi.axhline(sky[1],c='w',linestyle='--',alpha=0.5)
 
             print(sky)
 
-            sky_in = wcs.all_world2pix(-g.x_mean.value-1,g.y_mean.value+1,0)
+            sky_in = wcs.all_world2pix(g.x_mean.value,g.y_mean.value,0)
             
             ax_in.axvline(sky_in[0],c='w',linestyle='--', linewidth=1, alpha=0.25)
             ax_in.axhline(sky_in[1],c='w',linestyle='--', linewidth=1, alpha=0.25)
