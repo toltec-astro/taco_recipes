@@ -18,11 +18,11 @@
         snr_min: 3
         detect:
           peakdetect_delta_threshold: 3
-- enable_if: roach >=8 & file_suffix in ["targsweep", "tune"] # more aggressive detection in 1.4 and 2mm in tunes
+- enable_if: roach >=7 & file_suffix in ["targsweep", "tune"] # more aggressive detection in 1.4 and 2mm in tunes
   source:
     kids:
       kids_find:
-        peak_db_min: 0.03
+        peak_db_min: 0.1
 - enable_if: file_suffix=="vnasweep"
   source:
     kids:
