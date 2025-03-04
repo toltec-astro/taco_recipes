@@ -10,7 +10,7 @@
         d21_peak_min: 0.2 / Hz
         snr_min: 5
         peak_db_min: 0.1
-        select: "height_db > 1 | Qr < 25000"
+        select: "~((height_db < 1 & Qr > 25000) | (height_db < 0.1 & Qr > 10000))"
 - enable_if: roach >=7 # more aggressive detection in 1.4 and 2mm
   source:
     kids:
@@ -18,6 +18,11 @@
         snr_min: 3
         detect:
           peakdetect_delta_threshold: 3
+- enable_if: roach >=8 & file_suffix in ["targsweep", "tune"] # more aggressive detection in 1.4 and 2mm in tunes
+  source:
+    kids:
+      kids_find:
+        peak_db_min: 0.03
 - enable_if: file_suffix=="vnasweep"
   source:
     kids:
