@@ -14,3 +14,4 @@ Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -Re
 M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.50 -YDelta 0.00 -ZDelta 0.00
 #Sleep -sec  10
 endLoop
+M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta -3.00 -YDelta 0.00 -ZDelta 0.00
