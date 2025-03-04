@@ -12,6 +12,8 @@ from tolteca_kids.kids_find import SegmentBitMask
 import numpy as np
 import matplotlib.gridspec as gridspec
 import matplotlib
+import matplotlib.transforms as mtrans
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 if TYPE_CHECKING:
     from tolteca_datamodels.toltec.file import SourceInfoDataFrame, SourceInfoModel
@@ -297,8 +299,10 @@ def _plot_finding_ratio_nw(
     n_found = len(tlt)
 
     if kct is not None:
+        Qr = kct["Qr"]
         r_med = np.median(0.5 / kct["Qr"])
     else:
+        Qr = tlt["Qr"]
         r_med = np.median(0.5 / tlt["Qr"])
 
     x_off = (tlt["dist"] / tlt["f_chan"]).to_value(u.dimensionless_unscaled)
@@ -395,7 +399,7 @@ Multiple: {n_dup:3d}
     return locals()
 
 
-def _plot_finding_ratio_array(ax_array, nw_ctxs):
+def _plot_finding_ratio_array(ax_array, nw_ctxs, Qr_lims):
     ax = ax_array["ax"]
     cmap = ax_array["cmap"]
     if not nw_ctxs:
@@ -440,6 +444,45 @@ OK-tune: {n_ok:3d}/ {n_design:3d} {frac_ok_tune:4.1%}
         fontfamily="monospace",
         transform=ax.transAxes,
     )
+
+    # add a Qr plot
+    ax_divider = make_axes_locatable(ax)
+    ax = ax_divider.append_axes("bottom", size="10%", pad="10%")
+    Qrs = []
+    for ctx in nw_ctxs:
+        Qrs.append(ctx["Qr"])
+    Qrs = np.hstack(Qrs)
+    lim_left, lim_right = Qr_lims
+    ax.set_xlim(lim_left - 3000, lim_right + 3000)
+    if ax_array["is_label_ax"]:
+        ax.set_ylabel("Qr")
+        ax.yaxis.label.set(rotation='horizontal', ha='right', va="center")
+    ax.set_ylim(-0.5, 0.75)
+    # ax.set_xscale("log")
+    ax.get_yaxis().set_ticks([])
+    # ax.grid(axis='x', which="both")
+    ax.axvspan(ax.get_xlim()[0], lim_left, color="#cdcdcd")
+    trans = mtrans.blended_transform_factory(ax.transData, ax.transAxes)
+    text_y = 0.95  
+    ax.text(lim_left - 1000, text_y, "ROOM", ha="right", va="top", transform=trans)
+    ax.axvspan(lim_right, ax.get_xlim()[1], color="#cdcdcd")
+    ax.text(lim_right + 1000, text_y, "DARK", ha="left", va="top", transform=trans)
+    ax.text((lim_right + lim_left) * 0.5, text_y, "SKY", ha="center", va="top", transform=trans)
+
+    parts = ax.violinplot(
+        [Qrs], positions=[0], orientation="horizontal",
+        showextrema=False, showmedians=False,
+        )
+    Qr_med = np.median(Qrs)
+    Qr_25, Qr_75 = np.quantile(Qrs, [0.25, 0.75])
+    color = cmap(float(Qr_med > lim_left))
+    # ax.scatter(np.quantile(Qrs, [0.25, 0.75]), [0, 0], marker='.', color='red')
+    ax.errorbar(
+        [Qr_med], [0], xerr=[[Qr_med - Qr_25], [Qr_75 - Qr_med]],
+        marker='*', color=color, ms=20
+        )
+    for pc in parts['bodies']:
+        pc.set_facecolor(color)
 
 
 def _make_per_nw_apt_info(nw, apt):
@@ -540,6 +583,7 @@ def _make_kids_plot(
     for array_name in ToltecArray.array_names:
         ax_array = fctx["axes"][array_name]
         ax = ax_array["ax"]
+
         ax.text(1, 1, f"{array_name}", ha="right", va="top", transform=ax.transAxes)
         ax_array["ax"].set_aspect("equal")
         if ax_array["is_label_ax"]:
@@ -556,9 +600,16 @@ def _make_kids_plot(
             )
 
     # plot aggregated stats for array
+    # TODO: use skydip data result
+    Qr_on_sky_lims = {
+        "a1100": [8000, 12000],
+        "a1400": [4500, 8000],
+        "a2000": [4000, 6000],
+    }
+
     for array_name, nw_ctxs in nw_ctxs_per_array.items():
         ax_array = fctx["axes"][array_name]
-        _plot_finding_ratio_array(ax_array=ax_array, nw_ctxs=nw_ctxs)
+        _plot_finding_ratio_array(ax_array=ax_array, nw_ctxs=nw_ctxs, Qr_lims=Qr_on_sky_lims[array_name])
 
     fig = fctx["fig"]
     obsnum = tbl.iloc[0]["obsnum"]
