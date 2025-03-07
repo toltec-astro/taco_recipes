@@ -1,0 +1,10 @@
+Target Name:      M1
+Obs Date:         2024/03/1
+Coordinates:      83.63311446d 22.01448714d (J2000)
+Area mapped:      0.0497 deg**2
+Scanning Mode:    raster
+Polarized:        True (IQU)
+Number of Passes: 3
+Coadded Map RMS Sens.: 0.496 mJy
+Total integ. time:     1.8 h including overheads.
+

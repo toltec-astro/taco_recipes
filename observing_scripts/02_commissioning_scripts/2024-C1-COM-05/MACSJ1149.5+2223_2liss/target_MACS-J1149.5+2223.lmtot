@@ -1,0 +1,10 @@
+#ObservingScript -Name  "00_scripts/02_commissioning_scripts/2024-C1-COM-05/MACSJ1149.5+2223_2liss/target_MACS-J1149.5+2223.lmtot" -Author "obs_planner_simu" -Date "Sat Mar 23 03:00:39 UTC 2024"
+#Note -Note  LMT
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2024-C1-COM-05
+ObsGoal Dcs;  Dcs  -ObsDesc "DblLissajous" -ObsGoal Science
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +22:23:54.996 -Dec[1] +22:23:54.996 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 11:49:35.8008 -Ra[1] 11:49:35.8008 -SourceName 11h49m36s+22d23m55s -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 1800.0 -ScanRate 49.999999999999986 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 3.0 -YLength 3.0 -XOmega 0.6814365875454532 -YOmega 0.5451492700363626 -XDelta 45.0 -XLengthMinor 2.0 -YLengthMinor 2.0 -XDeltaMinor 90.0

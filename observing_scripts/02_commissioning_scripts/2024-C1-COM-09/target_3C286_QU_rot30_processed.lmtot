@@ -1,0 +1,14 @@
+#ObservingScript -Name "3C286.txt" -Author "obs_planner_simu" -Date "Fri Feb 23 19:28:27 UTC 2024"
+
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2024-C1-COM-09
+ObsGoal Dcs;  Dcs  -ObsDesc "Spinning HWP test" -ObsGoal Science
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+ToltecRoachSampleFreqSet ToltecBackend;  ToltecBackend  -RoachArg[0] 488 -RoachCmd samplefreq_set
+ObsGoal Dcs; Dcs -ObsGoal Science
+
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +30:30:32.96009156 -Dec[1] +30:30:32.96009156 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 13:31:08.28835064 -Ra[1] 13:31:08.28835064 -SourceName 3C286 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+
+RasterMap Map; Map -ExecMode 0 -HPBW 1 -HoldDuringTurns 0 -MapMotion Continuous -NumPass 1 -NumRepeats 1 -NumScans 0 -RowsPerScan 1000000 -ScansPerCal 0 -ScansToSkip 0 -TCal 0 -TRef 0 -TSamp 1 -MapCoord Ra -ScanAngle 30.0 -XLength 180.0 -XOffset 0 -XRamp 0 -XStep 5.0 -YLength 179.4 -YOffset 0 -YRamp 0 -YStep 13.8

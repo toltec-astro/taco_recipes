@@ -1,0 +1,4 @@
+#ObservingScript -Name "3C147.txt" -Author "obs_planner_simu" -Date "Fri Feb 23 19:33:01 UTC 2024"
+ObsGoal Dcs; Dcs -ObsGoal Science
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +49:51:07.23221374 -Dec[1] +49:51:07.23221374 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 05:42:36.13803554 -Ra[1] 05:42:36.13803554 -SourceName 3C147 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode 0 -RotateWithElevation 0 -TunePeriod 0 -TScan 300.0 -ScanRate 50.00000000000001 -XLength 3.0 -YLength 3.0 -XOmega 0.6916949170083467 -YOmega 0.5320730130833436 -XDelta 45.0 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0

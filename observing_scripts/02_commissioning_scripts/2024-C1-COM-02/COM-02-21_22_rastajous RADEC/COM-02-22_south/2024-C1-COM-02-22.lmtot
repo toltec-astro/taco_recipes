@@ -1,0 +1,5 @@
+#ObservingScript -Name "10h00m40s+01d59m30s.txt" -Author "obs_planner_simu" -Date "Fri Jan 26 17:33:49 UTC 2024"
+ObsGoal Dcs; Dcs -ObsGoal Science
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +01:59:30 -Dec[1] +01:59:30 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 10:00:40 -Ra[1] 10:00:40 -SourceName 10h00m40s+01d59m30s -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode 1 -RotateWithElevation 0 -TunePeriod 0 -TScan 2724.0 -ScanRate 50.00000000000001 -XLength 2.0 -YLength 2.0 -XOmega 1.0471975511965979 -YOmega 0.7853981633974484 -XDelta 45.0 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 90.0
+RasterMap Map; Map -ExecMode 1 -HPBW 1 -HoldDuringTurns 0 -MapMotion Continuous -NumPass 1 -NumRepeats 1 -NumScans 0 -RowsPerScan 1000000 -ScansPerCal 0 -ScansToSkip 0 -TCal 0 -TRef 0 -TSamp 1 -MapCoord Ra -ScanAngle 90.0 -XLength 1800.0 -XOffset 0 -XRamp 0 -XStep 40.0 -YLength 3600.0 -YOffset 0 -YRamp 0 -YStep 75.0

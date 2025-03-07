@@ -1,0 +1,8 @@
+Target Name:     M1
+Obs Date:        2024/03/1
+Coordinates:     83.63311446d 22.01448714d (J2000)
+Area mapped:     0.0489 deg**2
+Scanning Mode:   raster
+Total Intensity: I
+Total integ. time:  19 passes / every six passes change rot: 0, 45, 90 deg respectively / 1.33 h including overheads.
+

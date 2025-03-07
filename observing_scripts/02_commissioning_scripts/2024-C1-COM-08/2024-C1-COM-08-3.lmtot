@@ -1,0 +1,9 @@
+#ObservingScript -Name  "00_scripts/02_commissioning_scripts/2024-C1-COM-08/2024-C1-COM-08-3.lmtot" -Author "obs_planner_simu" -Date "Mon Mar 11 17:21:07 UTC 2024"
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2024-C1-COM-08-Raster
+ObsGoal Dcs;  Dcs  -ObsDesc "NGC4736 imaging" -ObsGoal Science
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +41:07:12.90088463 -Dec[1] +41:07:12.90088463 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 12:50:53.07379714 -Ra[1] 12:50:53.07379714 -SourceName ngc4736 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+RasterMap Map;  Map  -ExecMode 0 -HPBW 1 -HoldDuringTurns 0 -MapCoord Az -MapMotion Continuous -NumPass 1 -NumRepeats 1 -NumScans 0 -RowsPerScan 1000000 -ScanAngle 0.0 -ScansPerCal 0 -ScansToSkip 0 -TCal 0 -TRef 0 -TSamp 1 -XLength 1080.0 -XOffset 0 -XRamp 60 -XStep 60.0 -YLength 1080.0 -YOffset 0 -YRamp 0 -YStep 30.0

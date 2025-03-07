@@ -1,0 +1,4 @@
+#ObservingScript -Name "NGC3338.txt" -Author "obs_planner_simu" -Date "Fri Feb 16 14:41:25 UTC 2024"
+ObsGoal Dcs; Dcs -ObsGoal Science
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +13:44:49.1774681 -Dec[1] +13:44:49.1774681 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 10:42:07.53632249 -Ra[1] 10:42:07.53632249 -SourceName NGC3338 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode 0 -RotateWithElevation 0 -TunePeriod 0 -TScan 1800.0 -ScanRate 49.999999999999986 -XLength 6.0 -YLength 6.0 -XOmega 0.3407182937727266 -YOmega 0.2725746350181813 -XDelta 45.0 -XLengthMinor 2.0 -YLengthMinor 2.0 -XDeltaMinor 90.0

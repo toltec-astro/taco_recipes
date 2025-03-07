@@ -1,0 +1,4 @@
+#ObservingScript -Name "16h26m27.5s-24d23m57s.txt" -Author "obs_planner_simu" -Date "Wed Apr 24 21:45:59 UTC 2024"
+ObsGoal Dcs; Dcs -ObsGoal Science
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] -24:23:57 -Dec[1] -24:23:57 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 16:26:27.5 -Ra[1] 16:26:27.5 -SourceName 16h26m27.5s-24d23m57s -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode 0 -RotateWithElevation 0 -TunePeriod 0 -TScan 600.0 -ScanRate 49.999999999999986 -XLength 4.0 -YLength 4.0 -XOmega 0.5187711877562599 -YOmega 0.3990547598125076 -XDelta 45.0 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0

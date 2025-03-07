@@ -1,0 +1,64 @@
+simu:
+  jobkey: obs_planner_simu
+  instrument:
+    name: toltec
+    polarized: false
+    hwp:
+      f_rot: 2.0 Hz
+      f_smp: 20.0 Hz
+      rotator_enabled: true
+      installed: true
+    calobj_index: null
+    array_prop_table: |-
+      /home/toltec_umass_edu/toltec_astro/toltec_runtime/dasha/apt_GW_v8_with_fg_pg_loc_ori_flipped_flag_fixed.ecsv
+  mapping:
+    type: rastajous
+    target: 10h00m40s +01d59m30s
+    target_frame: icrs
+    ref_frame: icrs
+    t0: '2024-02-15T06:00:00.000'
+    length: 30.0 arcmin
+    space: 1.25 arcmin
+    n_scans: '48.0'
+    rot: 90.0 deg
+    speed: 40.0 arcsec / s
+    t_turnaround: 12.0 s
+    x_length_0: 2.0 arcmin
+    y_length_0: 2.0 arcmin
+    x_omega_0: 1.0471975511965979 rad / s
+    y_omega_0: 0.7853981633974484 rad / s
+    delta_0: 45.0 deg
+    x_length_1: 0.0 arcmin
+    y_length_1: 0.0 arcmin
+    x_omega_1: 0.013089969389957472 rad / s
+    y_omega_1: 0.013089969389957472 rad / s
+    delta_1: 90.0 deg
+    delta: 0.0 deg
+  obs_params:
+    t_exp: null
+    f_smp_mapping: 10.0 Hz
+    f_smp_probing: 100.0 Hz
+  sources:
+  - type: toltec_power_loading
+    atm_model_name: am_q25
+    tel_surface_rms: 100.0 um
+    det_noise_factor:
+      a1100: 2
+      a1400: 2
+      a2000: 2
+    atm_model_params: null
+    atm_cache_dir: null
+  perf_params:
+    chunk_len: 10.0 s
+    catalog_model_render_pixel_size: 0.5 arcsec
+    mapping_eval_interp_len: null
+    mapping_erfa_interp_len: 300.0 s
+    aplm_eval_interp_alt_step: 2.0 arcmin
+    pre_eval_sky_bbox_padding_size: 4.0 arcmin
+    pre_eval_t_grid_size: 200
+    anim_frame_rate: 1.0 Hz
+  plots: []
+  exports: []
+  plot_only: false
+  export_only: false
+  output_context: {}

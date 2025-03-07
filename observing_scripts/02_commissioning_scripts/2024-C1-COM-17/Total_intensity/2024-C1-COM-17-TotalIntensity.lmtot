@@ -1,0 +1,10 @@
+#ObservingScript -Name  "00_scripts/02_commissioning_scripts/2024-C1-COM-17/Total_intensity/2024-C1-COM-17-TotalIntensity.lmtot" -Author "default" -Date "Fri Feb 16 14:05:28 UTC 2024"
+#Note -Note  LMT
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2024-C1-COM-17
+ObsGoal Dcs;  Dcs  -ObsGoal Pointing
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Source Source;  Source  -Az[0] 0.000000 -Az[1] 0.000000 -B[0] 0.0 -B[1] 0.0 -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +11:58:52.6008 -Dec[1] +11:58:52.6008 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 09:39:53.95992 -Ra[1] 09:39:53.95992 -SourceName 09h39m54s+11d58m53s -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 1500 -ScanRate 50.0 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2.0 -YLength 2.0 -XOmega 5.0 -YOmega 4.0 -XDelta 45 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0

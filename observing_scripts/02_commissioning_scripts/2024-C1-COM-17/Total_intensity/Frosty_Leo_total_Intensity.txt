@@ -1,0 +1,8 @@
+Target Name:     Frosty Leo
+Obs Date:        2024/03/1
+Coordinates:     144.974833d 11.981278d (J2000)
+Area mapped:     0.0126 deg**2
+Scanning Mode:   lissajous
+Total Intensity: I
+Total integ. time:  3 passes / 0.6 h including overheads.
+
