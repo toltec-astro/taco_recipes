@@ -1,4 +1,11 @@
-#ObservingScript -Name "MACS0717.txt" -Author "obs_planner_simu" -Date "Wed Feb 07 16:37:47 UTC 2024"
-ObsGoal Dcs; Dcs -ObsGoal Science
+#ObservingScript -Name  "GitHub/taco_recipes/observing_scripts/02_commissioning_scripts/2024-C1-COM-05/MACSJ0717.5+3745/target_MACS0717.lmtot" -Author "obs_planner_simu" -Date "Wed Feb 07 16:37:47 UTC 2024"
+#Note -Note  LMT
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2025-C1-COM-05
+ObsGoal Dcs;  Dcs  -ObsGoal Science
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 1
 Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +37:45:29.7396 -Dec[1] +37:45:29.7396 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 07:17:30.92688 -Ra[1] 07:17:30.92688 -SourceName MACS0717.5+3745 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
-Lissajous -ExecMode 0 -RotateWithElevation 0 -TunePeriod 0 -TScan 600.0 -ScanRate 50.00000000000001 -XLength 6.0 -YLength 6.0 -XOmega 0.34584745850417337 -YOmega 0.2660365065416718 -XDelta 45.0 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 600.0 -ScanRate 50.00000000000001 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 6.0 -YLength 6.0 -XOmega 0.34584745850417337 -YOmega 0.2660365065416718 -XDelta 45.0 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0
