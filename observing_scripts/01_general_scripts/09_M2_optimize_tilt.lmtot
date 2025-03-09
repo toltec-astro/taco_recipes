@@ -1,6 +1,6 @@
 #ObservingScript -Name  "GitHub/taco_recipes/observing_scripts/01_general_scripts/09_M2_optimize_tilt.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2024_Tol_SRO
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
 ObsGoal Dcs;  Dcs  -ObsGoal Focus
 Toltec
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
@@ -14,3 +14,4 @@ Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -Re
 M2Increments M2;  M2  -TiltDelta 0.05 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta 0.00
 #Sleep -sec  1
 endLoop
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 1

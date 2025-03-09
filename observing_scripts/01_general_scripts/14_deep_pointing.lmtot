@@ -1,7 +1,7 @@
-#ObservingScript -Name  "/Applications/OpenWebStart/home/Documents/Work/TolTEC/taco_recipes/observing_scripts/01_general_scripts/14_deep_pointing.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
+#ObservingScript -Name  "GitHub/taco_recipes/observing_scripts/01_general_scripts/14_deep_pointing.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2024_TolTEC_Commissioning
-ObsGoal Dcs;  Dcs  -ObsGoal Pointing
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
+ObsGoal Dcs;  Dcs  -ObsGoal Science
 Toltec
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0
