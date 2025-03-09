@@ -1,4 +1,4 @@
-#ObservingScript -Name  "00_scripts/01_general_scripts/13_toltec_oof.lmtot" -Author "lmtmc" -Date "Mon Apr 23 03:31:16 UTC 2018"
+#ObservingScript -Name  "GitHub/taco_recipes/observing_scripts/01_general_scripts/13_toltec_oof.lmtot" -Author "lmtmc" -Date "Mon Apr 23 03:31:16 UTC 2018"
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
 ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
 ObsGoal Dcs;  Dcs  -ObsGoal Oof
@@ -13,3 +13,4 @@ Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -Re
 M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta 1.00
 endLoop
 M2Increments M2;  M2  -TiltDelta 0.00 -TipDelta 0.00 -XDelta 0.00 -YDelta 0.00 -ZDelta -2.00
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 1
