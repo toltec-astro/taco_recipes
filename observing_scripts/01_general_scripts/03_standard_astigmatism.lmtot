@@ -15,3 +15,4 @@ M1XAstigmatismIncrements M1;  M1  -ZernikeCDelta[0] 100
 #Sleep -sec  1
 endLoop
 M1XAstigmatism M1;  M1  -ZernikeCDelta[0] 0 -ZernikeC[0] 0
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 1
