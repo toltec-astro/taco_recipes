@@ -1,8 +1,8 @@
 #ObservingScript -Name  "/Applications/OpenWebStart/home/Documents/Work/TolTEC/taco_recipes/observing_scripts/02_commissioning_scripts/2025-C1-COM-21/COSMOS_AzTEC_C1.lmtot" -Author "default" -Date "Fri Mar 07 21:52:38 EST 2025"
 #Note -Note  LMT
 Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
-ProposalInfo Dcs;  Dcs  -ProjectId 2024-C1-COM-06
-ObsGoal Dcs;  Dcs  -ObsGoal Pointing
+ProposalInfo Dcs;  Dcs  -ProjectId 2025-C1-COM-21
+ObsGoal Dcs;  Dcs  -ObsGoal Science
 Toltec
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 TelescopeBackend -IncludeSignal  0
