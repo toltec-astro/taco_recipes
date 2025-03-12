@@ -166,6 +166,8 @@ def _hstack_images(files):
     if not kids_file_index:
         return _hstack_images_impl(images)
     kids_image = images.pop(kids_file_index[0])
+    if not images:
+        return kids_image
     images = [
             kids_image,
             _hstack_images_impl(images)
@@ -209,7 +211,7 @@ def get_quicklook_data(rootdir, bods, search_paths=None):
     # extract quick look data from dp
     if dp is None:
         logger.debug(f"no dp found in {search_paths=}")
-        return None, 'No reduced files found.'
+        return -1, None, 'No reduced files found.'
 
     # now compose the ql data object
     dpdir = dp.meta['context']['dpdir']
@@ -228,22 +230,27 @@ def get_quicklook_data(rootdir, bods, search_paths=None):
         obs_goal = dr.get_obs_goal(bods)
         logger.debug(f' collect ql files for {obs_goal=}')
         if obs_goal in ['test', 'pointing'] or 'pointing' in index['data_items'][0]['filepath'].name:
-            d = pointing_reader_data = get_pointing_reader_data(dp)
+            data_exit_code, d = get_pointing_reader_data(dp)
+            pointing_reader_data = d
             index['pointing_reader_data'] = pointing_reader_data
         elif obs_goal in ['beammap', ] or 'beammap' in index['data_items'][0]['filepath'].name:
-            d = beammap_reader_data = get_beammap_reader_data(dp)
+            data_exit_code, d = beammap_reader_data = get_beammap_reader_data(dp)
             index['beammap_reader_data'] = beammap_reader_data
         else:
+            data_exit_code = 0
             d = None
         logger.debug(f"ql_data: {d}")
         if d is not None:
             for item in d['data_items']:
                 ql_files.extend(item['quicklook_files'])
+    else:
+        data_exit_code = 0
+
     if len(ql_files) > 0:
         ql_response = get_quicklook_response(ql_files, save_path=dpdir)
         index['meta'].update(ql_response)
-        return index, None
-    return None, "Unkown type of data product."
+        return data_exit_code, index, None
+    return -1, None, "Unkown type of data product."
 
 
 def get_kids_ql_data(dp):
@@ -268,23 +275,28 @@ def get_pointing_reader_data(dp):
             'meta': dp.meta,
             'data_items': list()
             }
+    data_exit_code = 0
     for array_name in ['a1100', 'a1400', 'a2000']:
+        quicklook_files = []
+
         param_file = list(datadir.glob(f'toltec_{array_name}_pointing_*_params.txt'))
         if not param_file:
-            continue
-        param_file = param_file[-1]
-        quicklook_files = [param_file]
-        image_file = list(datadir.glob(f'toltec_{array_name}_pointing_*_image.png'))
+            params = None
+            data_exit_code = -1
+        else:
+            param_file = param_file[-1]
+            with open(param_file, 'r') as fo:
+                params = json.load(fo)
+            quicklook_files.append(param_file)
+        image_file = list(datadir.glob(f'toltec_{array_name}_pointing_*.png'))
         if image_file:
             quicklook_files.append(image_file[-1])
-        with open(param_file, 'r') as fo:
-            params = json.load(fo)
         result['data_items'].append({
             'array_name': array_name,
             'params': params,
             'quicklook_files': quicklook_files
             })
-    return result
+    return data_exit_code, result
 
 
 def get_beammap_reader_data(dp):
@@ -349,17 +361,17 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'message': f'No data found for obsnum={obsnum}'
                     }
         # print(bods)
-        ql_data, message = get_quicklook_data(dp_root, bods, search_paths=QL_SEARCH_PATHS)
+        ql_exit_code, ql_data, message = get_quicklook_data(dp_root, bods, search_paths=QL_SEARCH_PATHS)
         has_run = has_run_for_obsnum(get_client(), obsnum)
         print(f"{obsnum=} {has_run=}")
         if ql_data is None:
             # check if there is run for this obsnum
             return {
-                    'exit_code': 1 if has_run else -1,
+                    'exit_code': 1 if has_run else ql_exit_code,
                     'message': "reduction is running" if has_run else message
                     }
         return {
-                'exit_code': 1 if has_run else 0,
+                'exit_code': 1 if has_run else ql_exit_code,
                 'data': ql_data,
                 'message': "reduction is running" if has_run else message,
                 }

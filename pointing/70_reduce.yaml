@@ -149,8 +149,8 @@ reduce:
               enabled: true
             flagging:
               delta_f_min_Hz: 60e3
-              lower_weight_factor: 0.01
-              upper_weight_factor: 5
+              lower_tod_inv_var_factor: 0.01
+              upper_tod_inv_var_factor: 5
             output:
               enabled: false
           processed_time_chunk:
@@ -167,18 +167,20 @@ reduce:
                 a2000: [10]
             weighting:
               type: full #approximate
-              median_weight_factor: 10
+              median_map_weight_factor: 10
+              lower_map_weight_factor: 0
+              upper_map_weight_factor: 0
             flagging:
-              lower_weight_factor: 0.01
-              upper_weight_factor: 5
+              lower_tod_inv_var_factor: 0.01
+              upper_tod_inv_var_factor: 5
             output:
               enabled: false
           fruit_loops: 
             enabled: true
             path: null 
             type: obsnum/raw # obsnum/filtered 
-            lower_sig2noise_limit: 100
-            array_lower_flux_limit: [20,30,10]
+            sig2noise_limit: 100
+            array_flux_limit: [20,30,10]
             mode: upper
             max_iters: 5
             save_all_iters: false

@@ -4,7 +4,7 @@ import sys
 import astropy.units as u
 from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
-from tollan.utils.log import logger, reset_logger
+from tollan.utils.log import logger, reset_logger, timeit
 from tollan.utils.fmt import pformat_yaml
 from pathlib import Path
 from tolteca_datamodels.toltec.types import ToltecRoachInterface, ToltecArray
@@ -12,6 +12,7 @@ from tolteca_kids.kids_find import SegmentBitMask
 import numpy as np
 import matplotlib.gridspec as gridspec
 import matplotlib
+matplotlib.use("agg")
 import matplotlib.transforms as mtrans
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
@@ -57,6 +58,7 @@ def _ensure_find_file(*args, timeout=60, **kwargs):
         return file
 
 
+@timeit
 def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=60):
     interface = entry.interface
     nw = entry.roach
@@ -121,6 +123,7 @@ def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=60):
     return locals()
 
 
+@timeit
 def _make_kids_figure(layouts):
 
     nrows = len(layouts)
@@ -135,8 +138,9 @@ def _make_kids_figure(layouts):
         raise
         # figsize = (16, 10)
 
-    fig = plt.figure(figsize=figsize)
-    gs0 = gridspec.GridSpec(nrows, 1, figure=fig)
+    with timeit("make matplotlib figure"):
+        fig = plt.figure(figsize=figsize)
+        gs0 = gridspec.GridSpec(nrows, 1, figure=fig)
 
     array_names = ToltecArray.array_names
     kids_interfaces = ToltecRoachInterface.interfaces
@@ -155,6 +159,7 @@ def _make_kids_figure(layouts):
         axes_array = dict()
         kw = {}
         for i, array_name in enumerate(array_names):
+            logger.debug(f"make layout for {array_name}")
             dd = {
                 # 'is_lim_ax': True,
                 "is_label_ax": True,
@@ -211,6 +216,7 @@ def _make_kids_figure(layouts):
         axes_nw = dict()
         kw = {}
         for i, interface in enumerate(kids_interfaces):
+            logger.debug(f"make layout for {interface}")
             dd = {
                 # 'is_lim_ax': True,
                 "is_label_ax": True,
@@ -483,6 +489,7 @@ OK-tune: {n_ok:3d}/ {n_design:3d} {frac_ok_tune:4.1%}
         )
     for pc in parts['bodies']:
         pc.set_facecolor(color)
+
 
 
 def _make_per_nw_apt_info(nw, apt):

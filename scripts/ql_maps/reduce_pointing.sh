@@ -84,5 +84,6 @@ if [[ $? != 0 ]]; then
     exit 0
 fi
 echo "run pointing reader in ${redudir}"
+set -x
 time ${pybindir}/python3 $scriptdir/pointing_reader_v1_5.py -c crpix -p ${redudir}/${obsnum}/raw --obsnum ${obsnum} -s -o ${redudir}/${obsnum}/raw
 

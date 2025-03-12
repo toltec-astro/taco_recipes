@@ -20,6 +20,14 @@ import argparse
 import sys
 import json
 
+def _save_text_figure(filepath, text, **kwargs):
+    fig, ax = plt.subplots(1, 1, figsize=(4, 1))
+    ax.text(0.5, 0.5, text, transform=ax.transAxes, ha="center", va="center", **kwargs)
+    ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
+    fig.savefig(filepath, bbox_inches='tight')
+
+
 if __name__ == '__main__':
     fwhm_to_sigma = 1./(8.*np.log(2.))**0.5
 
@@ -49,6 +57,21 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     print(args)
+
+    def _mark_failed(message, message_short, array_name, exit=True, **kwargs):
+        print(message)
+        if args.save_to_file and args.output_path is not None:
+            if array_name is None:
+                array_names = ["a1100", "a1400", "a2000"]
+            else:
+                array_names = [array_name]
+            for a in array_names:
+                output_path = args.output_path + f'/toltec_{a}_pointing_reader_failed.png'
+                print(f"save text figure: {output_path}")
+                _save_text_figure(output_path, f"{a}\n" + message_short, **kwargs)
+        if exit:
+            sys.exit(1)
+
     # get path to input directory
     input_path = str(args.input_path)
         
@@ -62,8 +85,11 @@ if __name__ == '__main__':
         table = Table.read(ecsv_file)
     except:
         print('no pointing ecsv file found')
-        sys.exit()
-    
+        _mark_failed(
+                'no ppt files found',
+                'FAILED: no pointing table found.',
+                array_name=None, color='red')
+
     # get list of pointing FITS files
     if args.obsnum == 'none':
         fits_files = np.sort(glob.glob(input_path+'/toltec*pointing*.fits'))
@@ -72,9 +98,11 @@ if __name__ == '__main__':
 
     # check if there are any FITS files
     if fits_files.size == 0:
-        print('no pointing FITS files found')
-        sys.exit()
-        
+        _mark_failed(
+                'no pointing FITS files found',
+                'FAILED: reduction failed.',
+                array_name=None, color='red')
+
     # dictionary for pointing parameters, errors, and units
     ppt_dict = {
         'amp': {},
@@ -94,9 +122,14 @@ if __name__ == '__main__':
         elif 'a2000' in fits_files[i]:
             array = 'a2000'
         else:
-            print('cannot find TolTEC array name from FITS files')
-            sys.exit()
-        
+            continue
+            # _mark_failed(
+            #         'cannot find TolTEC array name from FITS files',
+            #         "FAILED: invalid FITS files.",
+            #         array_name=None,
+            #         color="red"
+            #         )
+
         # populate parameter dictionary
         for j in range(len(params)):
             key = params[j]
@@ -117,6 +150,17 @@ if __name__ == '__main__':
         
         # get current FITS file
         img = fits.open(fits_files[i])
+        if len(img) < 2:
+            # incomplete fits image from citlali
+            _mark_failed(
+                    f'error in {array} FITS data',
+                    "FAILED: reduction failed.",
+                    array_name=array,
+                    color="red",
+                    exit=False,
+                    )
+            continue
+
         # make WCS object
         wcs = WCS(img[1].header).sub(2)
         
