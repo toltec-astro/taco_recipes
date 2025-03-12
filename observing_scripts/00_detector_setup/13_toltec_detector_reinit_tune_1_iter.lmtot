@@ -1,0 +1,7 @@
+#ObservingScript -Name  "/D:/taco_recipes/observing_scripts/00_detector_setup/13_toltec_detector_reinit_tune_1_iter.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+ObsGoal Dcs;  Dcs  -ObsDesc "Drive Fit Commit" -ObsGoal Calibration
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+ToltecRoachDriveFitCommit ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd drivefit_commit
+ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] FILE -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
+ToltecRoachTargLoadFromFile ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd targ_load_from_file
+Tune Cal;  Cal  -CalMode Tune

@@ -1,11 +1,7 @@
-#ObservingScript -Name  "//wsl.localhost/Ubuntu/home/ma/mnt/W-Ma/toltec/toltec_astro_v2/taco_recipes/observing_scripts/00_detector_setup/21_toltec_detector_setup_drivefit_manual.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+#ObservingScript -Name  "/D:/taco_recipes/observing_scripts/00_detector_setup/21_toltec_detector_setup_drivefit.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
 ObsGoal Dcs;  Dcs  -ObsDesc "Drive Fit" -ObsGoal Calibration
 ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
 ToltecRoachTargLoadAmpsMode ToltecBackend;  ToltecBackend  -RoachArg[0] LUT -RoachCmd targ_load_amps_mode -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
-TargSweep Cal;  Cal  -CalMode TargSweep
-ToltecRoachTargReduce ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd targ_reduce
-ToltecRoachTargLoadFromFile ToltecBackend;  ToltecBackend  -RoachArg[0] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachCmd targ_load_from_file
-TargSweep Cal;  Cal  -CalMode TargSweep
 Tune Cal;  Cal  -CalMode Tune
 DcsSubObsMode Dcs;  Dcs  -SubObsMode 1
 ToltecRoachAttensOffsetDrive ToltecBackend;  ToltecBackend  -AttenDriveOffset -6 -RoachCmd null

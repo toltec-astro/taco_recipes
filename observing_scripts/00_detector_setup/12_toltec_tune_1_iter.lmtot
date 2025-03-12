@@ -1,0 +1,4 @@
+#ObservingScript -Name  "/D:/taco_recipes/observing_scripts/00_detector_setup/12_toltec_tune_1_iter.lmtot" -Author "default" -Date "Tue Mar 28 14:54:41 EDT 2023"
+ObsGoal Dcs;  Dcs  -ObsDesc "Detector Tune" -ObsGoal Calibration
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+Tune Cal;  Cal  -CalMode Tune
