@@ -1,5 +1,6 @@
 from __future__ import annotations
 from astropy.table import QTable
+import time
 import sys
 import astropy.units as u
 from typing import TYPE_CHECKING
@@ -40,7 +41,7 @@ def _find_file(patterns, search_paths, subpaths=None, unique=True):
     return None
 
 
-def _ensure_find_file(*args, timeout=60, **kwargs):
+def _ensure_find_file(*args, timeout=10, **kwargs):
     wait = 10
     counter = 0
     import time
@@ -48,7 +49,7 @@ def _ensure_find_file(*args, timeout=60, **kwargs):
     while True:
         file = _find_file(*args, **kwargs)
         if file is None:
-            if counter * wait > timeout:
+            if counter * wait >= timeout:
                 logger.debug(f"waiting for file {args} timeout")
                 return None
             logger.debug(f"waiting for file {args} ...")
@@ -59,7 +60,7 @@ def _ensure_find_file(*args, timeout=60, **kwargs):
 
 
 @timeit
-def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=60):
+def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=10):
     interface = entry.interface
     nw = entry.roach
     obsnum = entry.obsnum
@@ -539,12 +540,28 @@ def _make_kids_plot(
     search_paths = search_paths or []
     if output_dir is not None:
         search_paths.append(Path(output_dir))
-    for source_info in tbl.toltec_file.to_info_list():
+
+    overall_timeout = 60
+    per_nw_timeout = 10
+
+    def _collect(source_info, timeout):
+        nonlocal search_paths
         nw = source_info.roach
         search_paths = search_paths + [source_info.filepath.parent]
-        kids_info[nw].update(_collect_kids_info(source_info, search_paths))
+        kids_info[nw].update(_collect_kids_info(source_info, search_paths, timeout=timeout))
         if apt_design is not None:
             kids_info[nw].update(_make_per_nw_apt_info(nw, apt_design))
+
+    t_elapsed_overall = 0
+    for source_info in tbl.toltec_file.to_info_list():
+        if t_elapsed_overall > overall_timeout:
+            logger.warning("timeout when locating file, re-collect all and break")
+            for source_info in tbl.toltec_file.to_info_list():
+                _collect(source_info, timeout=0)
+            break
+        t_start = time.time()
+        _collect(source_info, timeout=per_nw_timeout)
+        t_elapsed_overall = t_elapsed_overall + time.time() - t_start
 
     fctx = _make_kids_figure(layouts=["nw", "array"])
 
