@@ -59,7 +59,7 @@ set +e
 
 # apt_in_file=${commondir}/apt_GW_2024_v4.ecsv #apt_GW_v8_with_fg_pg_loc_ori_flipped_flag.ecsv
 apt_in_file=${commondir}/apt.ecsv
-time ${pybindir}/python3 ${scriptdir}/make_matched_apt_fixed.py \
+time ${pybindir}/python3 ${scriptdir}/make_matched_apt.py \
     --data_rootpath ${dataroot}\
     --apt_in_file ${apt_in_file} \
     --output_dir ${rcdir}/data \
