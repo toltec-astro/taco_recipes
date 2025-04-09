@@ -93,11 +93,14 @@ class ToneMatch(
         uid_ref, swp_ref, tbl_kids_ref, f_kids_ref = self._resolve_ref(tbl, ref)
         tbl_result = []
         for swp in swps:
-            uid = swp.meta["uid_raw_obs"]
+            uid = swp.meta["uid_raw_obs_file"]
             if uid == uid_ref:
                 continue
             logger.debug(f"run tone match {uid} to {uid_ref}")
             tbl_kids, f_kids = self._get_tbl_kids(swp)
+            if tbl_kids is None:
+                logger.warning(f"unable to get kids table for {uid}, skipped")
+                continue
             ctx = self.tone_match2(
                 cfg.match,
                 tbl_kids,
@@ -115,8 +118,8 @@ class ToneMatch(
                 "uid_ref": uid_ref,
                 "n_kids": len(ctx["tbl_kids"]),
                 "n_kids_ref": len(ctx["tbl_kids_ref"]),
-                "n_matched": len(ctx["tbl_matched"]),
-                "n_matched_ref": len(ctx["tbl_matched_ref"]),
+                "n_matched": ctx["tbl_matched"]["mask_match_unique"].sum(),
+                "n_matched_ref": ctx["tbl_matched_ref"]["mask_match_unique"].sum(),
                 "shift": ctx["matched"].shift.to(u.kHz),
             })
             ctx["tbl_matched"].write(
@@ -124,12 +127,21 @@ class ToneMatch(
                 format='ascii.ecsv',
                 overwrite=True,
                 )
+        if not tbl_result:
+            message = "no kids data found" 
+            return locals()
         tbl_result = pd.DataFrame.from_records(tbl_result)
+        tbl_result["frac_matched"] = tbl_result["n_matched"] / tbl_result["n_kids"]
+        tbl_result["frac_matched_ref"] = tbl_result["n_matched_ref"] / tbl_result["n_kids_ref"]
         tbl_result_display = tbl_result[
             [c for c in tbl_result.columns if c not in ["swp", "swp_ref", "ctx"]]]
-        logger.debug(f"tbl_result:\n{tbl_result_display}")
-        n_chans = tbl_result["n_kids_ref"].min().item()
-        n_success = tbl_result["n_matched_ref"].min().item()
+        logger.info(f"tbl_result:\n{tbl_result_display}")
+        n_kids_ref = tbl_result["n_kids_ref"].min().item()
+        n_kids_min = tbl_result["n_kids"].min().item()
+        n_kids_max = tbl_result["n_kids"].max().item()
+        frac_matched_min = tbl_result["frac_matched_ref"].min().item()
+        frac_matched_max = tbl_result["frac_matched_ref"].max().item()
+        message = f"{n_kids_ref=} {n_kids_min=} {n_kids_max=} frac_min={frac_matched_min:.2%} frac_max={frac_matched_max:.2%}"
 
         # save all in ref output
         tbl_collated = None
@@ -140,7 +152,7 @@ class ToneMatch(
                 # add the uid_ref columns
                 tr = entry.ctx["tbl_matched_ref"]
                 for c in tr.colnames:
-                    if c.endswith(entry.uid):
+                    if c.endswith(entry.ctx["matched_suffix"]):
                         tbl_collated[c] = tr[c]
         tbl_collated_filepath_suffix = f"_matched_{tbl_result['uid'].iloc[0]}_g{len(tbl_result)}.ecsv"
         if swp_ref is not None:
@@ -229,6 +241,8 @@ class ToneMatch(
         is_vna = swp.meta["file_suffix"] == "vnasweep"
         if is_vna:
             tbl_kf = _get_kpt(swp, "kids_find")
+            if tbl_kf is None:
+                return None, None
             return tbl_kf, tbl_kf["f_det"]
         # use chan info for other sweeps
         tbl_chans = swp.meta["chan_axis_data"]
@@ -250,13 +264,16 @@ class ToneMatch(
                     pass
             tbl_chans2["idx_chan"] = tbl_chans["id"]
             tbl_chans = tbl_chans2
+        if tbl_chans is None:
+            return None, None
         return tbl_chans, tbl_chans["f_chan"]
     
     @staticmethod
     def tone_match2(
         matcher, tbl_kids, f_kids, tbl_kids_ref, f_kids_ref,
         match_shift_max=10 << u.MHz,
-        match_shift_step=2 << u.kHz):
+        match_shift_step=2 << u.kHz,
+    ):
         logger.debug(
             f"n_tones={len(tbl_kids)} n_tones_ref={len(tbl_kids_ref)}"
             f" {match_shift_max=} {match_shift_step=}"
@@ -298,11 +315,23 @@ class ToneMatch(
                 "dx": match_shift_step,
             },
         )
+
+        def _make_unique(tbl, idx_key, idx_other_key, dist_key):
+            # assign flags to matched and remove duplicates
+            t = tbl.copy()
+            t.sort(dist_key)
+            _, unique_indices = np.unique(t[idx_other_key], return_index=True)
+            tbl["mask_match_unique"] = False
+            tbl["mask_match_unique"][t[idx_key][unique_indices]] = True
+            return tbl
+ 
         tbl_matched = tbl_kids.copy()
         tq = matched.data["query_matched"]
         tbl_matched["f"] = tq["query"]
         tbl_matched["f_ref"] = tq["ref"]
         for colname in [
+            "idx_query",
+            "idx_ref",
             "dist",
             "dist_shifted",
             "adist_shifted",
@@ -315,10 +344,13 @@ class ToneMatch(
         ]:
             if colname in tq.colnames:
                 tbl_matched[colname] = tq[colname]
+        tbl_matched = _make_unique(tbl_matched, "idx_query", "idx_ref", "adist_shifted")
         tbl_matched_ref = tbl_kids_ref.copy()
         matched_suffix = tbl_kids.meta["uid_raw_obs"]
         tr = matched.data["ref_matched"]
+        tbl_matched_ref["idx_ref"] = tr["idx_ref"]
         tbl_matched_ref["f_ref"] = tr["ref"]
+        tbl_matched_ref[f"idx_{matched_suffix}"] = tr["idx_query"]
         tbl_matched_ref[f"f_{matched_suffix}"] = tr["query"]
         for colname in [
             "dist",
@@ -333,11 +365,9 @@ class ToneMatch(
         ]:
             if colname in tr.colnames:
                 tbl_matched_ref[f"{colname}_{matched_suffix}"] = tr[colname]
+        tbl_matched_ref = _make_unique(tbl_matched_ref, "idx_ref", f"idx_{matched_suffix}", f"adist_shifted_{matched_suffix}")
         logger.debug(f"tbl_matched_ref:\n{tbl_matched_ref}")
         tbl_matched_ref.meta.update({f"tone_match_{matched_suffix}": tbl_kids.meta})
-
-        n_success = len(tq)
-        n_chans = len(tbl_kids)
         return locals()
 
     def plot_tone_match(self, ctx):
@@ -458,22 +488,20 @@ class AptMake(
             tbl.add_column(Column(range(n_chans), name='kids_tone'), 0)
             return tbl
         
-        def _clean_up_matched(entry, tbl_matched):
-            t = tbl_matched.copy()
-            t.sort("adist_shifted")
-            _, unique_indices = np.unique(t["idx_chan_ref"], return_index=True)
-            tbl_matched["m_good_ref"] = False
-            m = tbl_matched["m_good_ref"]
-            m[t["idx_chan"][unique_indices]] = True
-            m[tbl_matched["adist_shifted"] > cfg.dist_max] = False
-            return tbl_matched
+        def _clean_up_matched(entry, tbl):
+            # check dist and update the flag
+            dist_max = cfg.dist_max
+            mask_dist = (tbl["adist_shifted"] <= dist_max)
+            logger.debug(f"mask dist with {dist_max=}: {pformat_mask(mask_dist)}")
+            tbl["m_good_ref"] = tbl["mask_match_unique"] & mask_dist
+            return tbl
         
         def _add_apt_cols(entry, tbl_apt, tbl_apt_ref):
             tbl_apt_ref.meta["obsnum_matched"] = tbl_apt_ref.meta.pop("obsnum")
             t = join(
                 tbl_apt,
                 tbl_apt_ref,
-                keys="idx_chan_ref",
+                keys="idx_ref",
                 join_type="left",
                 keep_order=True,
                 uniq_col_name="{col_name}{table_name}",
@@ -493,13 +521,14 @@ class AptMake(
 
             tbl_model = self._get_tbl_model(entry, search_paths=tbl_model_search_paths)
             tbl = _tbl_model_to_apt(entry, tbl_model)
-            for c in ["idx_chan_ref", "dist", "adist_shifted"]:
+            for c in ["idx_ref", "idx_chan_ref", "dist", "adist_shifted"]:
                 tbl[c] = tbl_matched[c]
-            tbl["idx_chan_ref"][~tbl_matched["m_good_ref"]] = -1
+            tbl["idx_ref"][~tbl_matched["m_good_ref"]] = -1
             if isinstance(ref, QTable):
                 # attach apt info from match
                 tbl_apt_ref = ref[ref["nw"] == entry.roach]
-                tbl_apt_ref["idx_chan_ref"] = tbl_apt_ref["kids_tone"].astype(int)
+                tbl_apt_ref["idx_ref"] = tbl_apt_ref["kids_tone"].astype(int)
+                tbl_apt_ref["flag_ref"] = tbl_apt_ref["flag"]
                 tbl = _add_apt_cols(entry, tbl, tbl_apt_ref)
             # remove model columns
             tbl_apt.append(tbl)
@@ -509,10 +538,18 @@ class AptMake(
         for k in ['obsnum', 'subobsnum', 'scannum']:
             tbl_apt.meta[k] = getattr(entry, k)
         tbl_apt = tbl_apt.filled(0.)
-        tbl_apt["flag"] = (tbl_apt["idx_chan_ref"] < 0).astype(float)
-
-        n_success =(tbl_apt["flag"] == 0).sum().item()
+        tbl_apt["flag"] = (tbl_apt["idx_ref"] < 0).astype(float)
+        # propogate flag from ref
+        if "flag_ref" in tbl_apt.colnames:
+            flag = tbl_apt["flag"].astype(bool)
+            flag_ref = tbl_apt["flag_ref"].astype(bool)
+            flag_new = flag | flag_ref
+            logger.debug(f"update ref flag {pformat_mask(flag_ref)} with flag {pformat_mask(flag)} to new flag {pformat_mask(flag_new)}")
+            tbl_apt["flag"] = flag_new.astype(float)
+   
+        n_good =(tbl_apt["flag"] == 0).sum().item()
         n_chans = len(tbl_apt)
+        message = f"{n_good=} {n_chans=} {n_good/n_chans:.2%}"
         return locals()
 
     def _get_tbl_kids(self, entry, suffix, ext):
@@ -569,9 +606,7 @@ def _run(
             returncode = 1
             message = f"{step_name} failed: {e}"
         else:
-            n_success = ctx["n_success"]
-            n_chans = ctx["n_chans"]
-            message = f"{step_name} {n_success=} {n_chans=}"
+            message = f"{step_name} {ctx['message']}"
             returncode = 0
         return returncode, locals()
 
@@ -695,7 +730,8 @@ if __name__ == "__main__":
     logger.info(f"{pformat_yaml(rc.config.model_dump())}")
 
     def _report_run_stats(report, exit_fail_only=False):
-        logger.info(f"run status:\n{report}")
+        with pd.option_context('display.max_rows', None, 'display.max_colwidth', 200):
+            logger.info(f"run status:\n{report}")
         n_failed = np.sum(report["returncode"] != 0)
         if n_failed == 0:
             logger.info("Job's done!")
