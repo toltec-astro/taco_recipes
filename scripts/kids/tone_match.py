@@ -101,15 +101,19 @@ class ToneMatch(
             if tbl_kids is None:
                 logger.warning(f"unable to get kids table for {uid}, skipped")
                 continue
-            ctx = self.tone_match2(
-                cfg.match,
-                tbl_kids,
-                f_kids,
-                tbl_kids_ref,
-                f_kids_ref,
-                match_shift_max=cfg.match_shift_max,
-                match_shift_step=cfg.match_shift_step,
-                )
+            try:
+                ctx = self.tone_match2(
+                    cfg.match,
+                    tbl_kids,
+                    f_kids,
+                    tbl_kids_ref,
+                    f_kids_ref,
+                    match_shift_max=cfg.match_shift_max,
+                    match_shift_step=cfg.match_shift_step,
+                    )
+            except Exception:
+                logger.warning(f"failed to match {uid}, skipped")
+                continue
             tbl_result.append({
                 "swp": swp,
                 "swp_ref": swp_ref,
@@ -141,7 +145,8 @@ class ToneMatch(
         n_kids_max = tbl_result["n_kids"].max().item()
         frac_matched_min = tbl_result["frac_matched_ref"].min().item()
         frac_matched_max = tbl_result["frac_matched_ref"].max().item()
-        message = f"{n_kids_ref=} {n_kids_min=} {n_kids_max=} frac_min={frac_matched_min:.2%} frac_max={frac_matched_max:.2%}"
+        n_success = len(tbl_result)
+        message = f"{n_success=} {n_kids_ref=} {n_kids_min=} {n_kids_max=} frac_min={frac_matched_min:.2%} frac_max={frac_matched_max:.2%}"
 
         # save all in ref output
         tbl_collated = None
