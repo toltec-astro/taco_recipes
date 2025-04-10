@@ -92,8 +92,12 @@ class ToneMatch(
         swps = tbl.toltec_file.data_objs
         uid_ref, swp_ref, tbl_kids_ref, f_kids_ref = self._resolve_ref(tbl, ref)
         tbl_result = []
-        for swp in swps:
-            uid = swp.meta["uid_raw_obs_file"]
+        for entry, _, swp in tbl.toltec_file.iter_objs():
+            uid = entry.uid_raw_obs_file
+            if swp is None:
+                logger.warning(f"missing swp data for {uid}, skipped")
+                continue
+            assert uid == swp.meta["uid_raw_obs_file"]
             if uid == uid_ref:
                 continue
             logger.debug(f"run tone match {uid} to {uid_ref}")
