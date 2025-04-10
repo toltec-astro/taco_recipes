@@ -375,6 +375,7 @@ class ToneMatch(
             if colname in tr.colnames:
                 tbl_matched_ref[f"{colname}_{matched_suffix}"] = tr[colname]
         tbl_matched_ref = _make_unique(tbl_matched_ref, "idx_ref", f"idx_{matched_suffix}", f"adist_shifted_{matched_suffix}")
+        tbl_matched_ref[f"mask_match_unique_{matched_suffix}"] = tbl_matched_ref["mask_match_unique"]
         logger.debug(f"tbl_matched_ref:\n{tbl_matched_ref}")
         tbl_matched_ref.meta.update({f"tone_match_{matched_suffix}": tbl_kids.meta})
         return locals()
