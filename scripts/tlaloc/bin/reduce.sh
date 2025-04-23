@@ -68,7 +68,7 @@ else
         echo "run dispatch tlaloc bin on ${remote_exec_host}"
 	remote_file=${HOME}/toltec_astro/run/data_lmt/toltec/${link}
 	remote_tlaloc_etc=${HOME}/toltec_astro/run/tlaloc_etc
-        ssh -t ${remote_exec_host} bash ${dispatch_tlaloc_bin} ${remote_file} --etc_path ${remote_tlaloc_etc} "$@"
+        ssh -oStrictHostKeyChecking=accept-new -t ${remote_exec_host} bash ${dispatch_tlaloc_bin} ${remote_file} --etc_path ${remote_tlaloc_etc} "$@"
     }
 fi 
 if [[ ${action} =~ "drivefit_reduce" ]]; then
