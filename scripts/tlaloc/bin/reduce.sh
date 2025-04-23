@@ -54,17 +54,34 @@ echo "use scratch ${scratchdir}"
 # dispatch drive fit
 
 dispatch_tlaloc_bin=${scriptdir}/../dispatch_tlaloc.sh
+
+# resolve file name for remote exec
+remote_exec_host=taca
+# remote_exec_host=
+if [[ ! ${remote_exec_host} ]]; then
+    function run_tlaloc_dispatch {
+        echo "run dispatch tlaloc bin locally"
+        bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc "$@"
+    }
+else
+    function run_tlaloc_dispatch {
+        echo "run dispatch tlaloc bin on ${remote_exec_host}"
+	remote_file=${HOME}/toltec_astro/run/data_lmt/toltec/${link}
+	remote_tlaloc_etc=${HOME}/toltec_astro/run/tlaloc_etc
+        ssh -t ${remote_exec_host} bash ${dispatch_tlaloc_bin} ${remote_file} --etc_path ${remote_tlaloc_etc} "$@"
+    }
+fi 
 if [[ ${action} =~ "drivefit_reduce" ]]; then
     echo "run drive fit reduce"
     set -x
-    bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc --action ${action} 2>&1
+    run_tlaloc_dispatch --action ${action} 2>&1
     set +x
     exit 0
 fi
 if [[ ${action} =~ "drivefit_commit" ]]; then
     echo "run drive fit commit"
     set -x
-    bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc --action ${action} 2>&1
+    run_tlaloc_dispatch --action ${action} 2>&1
     set +x
     exit 0
 fi
@@ -188,5 +205,6 @@ elif [[ ${type} == "timestream" ]]; then
     fi
 fi
 
-dispatch_tlaloc_bin=${scriptdir}/../dispatch_tlaloc.sh
-bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc --action ${action} 2>&1
+# dispatch_tlaloc_bin=${scriptdir}/../dispatch_tlaloc.sh
+# bash ${dispatch_tlaloc_bin} ${file} --etc_path ${HOME}/tlaloc/etc --action ${action} 2>&1
+run_tlaloc_dispatch --action ${action} 2>&1
