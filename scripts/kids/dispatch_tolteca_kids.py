@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument("--save_plot", action="store_true", help="Save plots.")
     LmtToltecPathOption.add_args_to_parser(parser, obs_spec_required=True)
 
-    kids_cli_args, args = split_cli_args("^kids\..+", sys.argv[1:])
+    kids_cli_args, args = split_cli_args(r"^kids\..+", sys.argv[1:])
     logger.debug(
         f"kids_cli_args:\n{pformat_yaml(kids_cli_args)}\n"
         f"other_args:\n{pformat_yaml(args)}",

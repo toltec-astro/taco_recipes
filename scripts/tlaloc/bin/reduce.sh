@@ -1,4 +1,19 @@
 #!/bin/bash
+TARGET_USER="toltec"
+
+if [ "$EUID" -eq 0 ]; then
+    echo "Running as root. Switching to $TARGET_USER..."
+    scriptdir=$(dirname "$(readlink -f "$0")")
+    scriptpath=${scriptdir}/$(basename $0)
+    su - "$TARGET_USER" -c "${scriptpath} $*"
+    echo "Back to root."
+    exit 0
+fi
+
+# Actual script logic goes here
+echo "Running as user: $(whoami)"
+
+
 source /home/toltec/toltec_astro/dotbashrc
 
 file=${@: 1:1}
