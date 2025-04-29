@@ -1,0 +1,18 @@
+#ObservingScript -Name  "/Applications/OpenWebStart/home/Documents/Work/TolTEC/taco_recipes/observing_scripts/04_zernike_scripts/03_COMA_V_step.lmtot" -Author "obs_planner_simu" -Date "Thu Jun 16 21:38:53 UTC 2022"
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
+ObsGoal Dcs;  Dcs  -ObsGoal Astigmatism
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Tune Cal;  Cal  -CalMode Tune
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 0
+M1ZernikeOffsets M1;  M1  -ZernikeDelta 0 -ZernikeIdx COMA_V -ZernikeOffset -300
+#Sleep -sec  1
+Loop -loop_name  Loop -loop_repeat 7 -loop_when EndOfLoop
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 30 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0
+M1ZernikeIncrements M1;  M1  -ZernikeDelta 100
+#Sleep -sec  1
+endLoop
+M1ZernikeOffsets M1;  M1  -ZernikeDelta 0 -ZernikeIdx COMA_V -ZernikeOffset 0
+ToltecTuneFlag null;  ToltecBackend  -NeedsTune 1
