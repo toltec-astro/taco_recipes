@@ -166,7 +166,7 @@ reduce:
                 a1400: [10]
                 a2000: [10]
             weighting:
-              type: full #approximate
+              type: approximate #full #approximate
               median_map_weight_factor: 10
               lower_map_weight_factor: 0
               upper_map_weight_factor: 0
