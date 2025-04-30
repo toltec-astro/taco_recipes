@@ -29,6 +29,7 @@ dispatch_py ${obs_specs} \
     --search_paths \
     ${scratchdir} \
     ${dataroot}/toltec/reduced \
+    ${dataroot}/toltec_reduced_taca \
     ${dataroot}/toltec_clip{a,o}/reduced \
     --data_lmt_path ${dataroot} \
     > ${logdir}/reduce_kids_ql.log
