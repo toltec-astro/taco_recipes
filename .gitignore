@@ -67,3 +67,6 @@ pip-wheel-metadata/
 
 # mkdocs
 site
+
+# custon
+**/generated
