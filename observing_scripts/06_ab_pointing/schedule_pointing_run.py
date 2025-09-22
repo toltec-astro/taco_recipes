@@ -1,0 +1,1 @@
+../05_all_sky_pointing/schedule_pointing_run.py
