@@ -50,7 +50,8 @@ def make_ot_script(config, output_dir=Path("generated"), tbl_sources=None):
             name = info["name"]
             coo = _get_source_coord(tbl_sources, name)
             ot_script += "\n" + ot_script_template["body"].format(
-                name=name, ra=coo.ra.deg, dec=coo.dec.deg,
+                    name=name, ra=coo.ra.to_string(unit=u.hourangle, sep=":"),
+                    dec=coo.dec.to_string(unit=u.deg, sep=":"),
             ).strip()
     if not script_dir.exists():
         script_dir.mkdir(parents=True)
