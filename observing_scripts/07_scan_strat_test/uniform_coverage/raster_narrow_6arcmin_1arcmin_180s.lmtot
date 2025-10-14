@@ -1,0 +1,9 @@
+#ObservingScript -Name "M1.txt" -Author "obs_planner_simu" -Date "Tue Oct 14 21:02:34 UTC 2025"
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2025_Tol_SRO
+ObsGoal Dcs;  Dcs  -ObsGoal Pointing
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+ToltecRoachSampleFreqSet ToltecBackend;  ToltecBackend  -RoachArg[0] 122 -RoachCmd samplefreq_set -RoachArg[1] null -RoachArg[2] null -RoachArg[3] null -RoachArg[4] null -RoachArg[5] null -RoachArg[6] null -RoachArg[7] null -RoachArg[8] null -RoachArg[9] null -RoachArg[10] null -RoachArg[11] null -RoachArg[12] null -RoachArg[13] null -RoachArg[14] null -RoachArg[15] null
+RasterMap Map; Map -ExecMode 0 -HPBW 1 -HoldDuringTurns 0 -MapMotion Continuous -NumPass 1 -NumRepeats 1 -NumScans 0 -RowsPerScan 1000000 -ScansPerCal 0 -ScansToSkip 0 -TCal 0 -TRef 0 -TSamp 1 -MapCoord Az -ScanAngle 0.0 -XLength 360.0 -XOffset 0 -XRamp 0 -XStep 30.0 -YLength 66.0 -YOffset 0 -YRamp 0 -YStep 6.0
