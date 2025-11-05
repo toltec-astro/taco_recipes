@@ -25,6 +25,8 @@ def reduce_sweep(rc: RuntimeContext, data):
             returncode = 1
             message = "reduction failed"
         else:
+            if not kids.kids_find.has_context(swp):
+                return 1, {"message": "kids_find did not run"}
             ctx = kids.kids_find.get_context(swp)
             n_chans = swp.n_chans
             n_kids = len(ctx.data.detected)
