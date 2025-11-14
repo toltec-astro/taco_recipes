@@ -104,8 +104,13 @@ if __name__ == "__main__":
             "bin": (10, 27.5),
         },
     ]
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--day_offset", type=int, default=0)
+    option = parser.parse_args()
+    day_offset = option.day_offset
 
-    time_now = Time.now()
+    time_now = Time.now() + (day_offset << u.day)
     now_is_night = lmt_observer.is_night(time_now)
 
     if now_is_night:
