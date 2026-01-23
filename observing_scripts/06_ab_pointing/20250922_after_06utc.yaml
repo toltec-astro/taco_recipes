@@ -1,0 +1,8 @@
+name: 20250922_after_06utc
+description: |
+  source list for toltec AB pointing run 20250922; needs to run after 06 UTC.
+
+n_repeats: 10
+sources:
+- name: 2253+161
+- name: 2232+117

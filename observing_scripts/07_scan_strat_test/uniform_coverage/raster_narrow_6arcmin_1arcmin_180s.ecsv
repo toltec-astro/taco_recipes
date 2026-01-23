@@ -1,0 +1,135 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: array_name, datatype: string}
+# - {name: alt_mean, unit: deg, datatype: float64}
+# - {name: P, unit: pW, datatype: float64}
+# - {name: n_dets_info, datatype: string}
+# - {name: net_cmb, unit: mK / Hz(1/2), datatype: float64}
+# - {name: nefd, unit: mJy / Hz(1/2), datatype: float64}
+# - {name: nep, unit: aW / Hz(1/2), datatype: float64}
+# - {name: nefd_I, unit: mJy / Hz(1/2), datatype: float64}
+# - {name: nefd_QU, unit: mJy / Hz(1/2), datatype: float64}
+# - {name: dsens_I, unit: mJy s(1/2), datatype: float64}
+# - {name: dsens_QU, unit: mJy s(1/2), datatype: float64}
+# - {name: mapping_speed_I, datatype: string}
+# - {name: mapping_speed_QU, datatype: string}
+# - {name: polarized, datatype: bool}
+# - {name: depth_stokes_params, datatype: string}
+# - {name: depth_rms, unit: mJy, datatype: float64}
+# - {name: t_exp, unit: s, datatype: float64}
+# - {name: t_exp_eff, unit: s, datatype: float64}
+# - {name: map_area, unit: deg2, datatype: float64}
+# - {name: n_passes, datatype: int64}
+# - {name: depth_rms_coadd_desired, unit: mJy, datatype: float64}
+# - {name: depth_rms_coadd_actual, unit: mJy, datatype: float64}
+# - {name: proj_science_time, unit: h, datatype: float64}
+# - {name: proj_science_time_per_night, datatype: int64}
+# - {name: proj_n_nights, datatype: int64}
+# - {name: proj_science_overhead_time, unit: h, datatype: float64}
+# - {name: proj_total_time, unit: h, datatype: float64}
+# - {name: proj_overhead_time, unit: h, datatype: float64}
+# - {name: proj_overhead_percent, datatype: string}
+# meta: !!omap
+# - {created_at: '2025-10-14T21:02:34.132'}
+# - exec_config:
+#     desired_sens: 1.0 mJy
+#     instru_data:
+#       apt_path: /home/toltec_umass_edu/toltec_astro_v1/toltec_runtime/dasha/apt_GW_v8_with_fg_pg_loc_ori_flipped_flag_fixed.ecsv
+#       array_name: a1100
+#       coverage_map_type: depth
+#       det_noise_factors:
+#         am_q25: {a1100: 2, a1400: 2, a2000: 2}
+#         am_q50: {a1100: 2.19, a1400: 2.19, a2000: 2.19}
+#         am_q75: {a1100: 2.34, a1400: 2.34, a2000: 2.34}
+#       name: toltec
+#       polarized: false
+#       revision: 'revision: 20250303.0'
+#       stokes_params: I
+#     mapping: {length: 0.1 deg, n_scans: '11.0', ref_frame: altaz, rot: 0.0 deg, space: 0.1 arcmin, speed: 0.5 arcmin / s, t0: '2024-02-15T06:00:00.000',
+#       t_turnaround: 5.0 s, target: M1, target_frame: icrs, type: raster}
+#     obs_params: {f_smp_mapping: 10.0 Hz, f_smp_probing: 100.0 Hz, t_exp: null}
+#     site_data: {atm_model_name: am_q25, name: lmt, tel_surface_rms_um: 100}
+#     speed_lissajous: null
+# - __serialized_columns__:
+#     P:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: pW}
+#       value: !astropy.table.SerializedColumn {name: P}
+#     alt_mean:
+#       __class__: astropy.coordinates.angles.Latitude
+#       unit: !astropy.units.Unit {unit: deg}
+#       value: !astropy.table.SerializedColumn {name: alt_mean}
+#     depth_rms:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: &id001 !astropy.units.Unit {unit: mJy}
+#       value: !astropy.table.SerializedColumn {name: depth_rms}
+#     depth_rms_coadd_actual:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id001
+#       value: !astropy.table.SerializedColumn {name: depth_rms_coadd_actual}
+#     depth_rms_coadd_desired:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: mJy}
+#       value: !astropy.table.SerializedColumn {name: depth_rms_coadd_desired}
+#     dsens_I:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: mJy s(1/2)}
+#       value: !astropy.table.SerializedColumn {name: dsens_I}
+#     dsens_QU:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: mJy s(1/2)}
+#       value: !astropy.table.SerializedColumn {name: dsens_QU}
+#     map_area:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: deg2}
+#       value: !astropy.table.SerializedColumn {name: map_area}
+#     nefd:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: &id002 !astropy.units.Unit {unit: mJy / Hz(1/2)}
+#       value: !astropy.table.SerializedColumn {name: nefd}
+#     nefd_I:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id002
+#       value: !astropy.table.SerializedColumn {name: nefd_I}
+#     nefd_QU:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id002
+#       value: !astropy.table.SerializedColumn {name: nefd_QU}
+#     nep:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: aW / Hz(1/2)}
+#       value: !astropy.table.SerializedColumn {name: nep}
+#     net_cmb:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: !astropy.units.Unit {unit: mK / Hz(1/2)}
+#       value: !astropy.table.SerializedColumn {name: net_cmb}
+#     proj_overhead_time:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: &id003 !astropy.units.Unit {unit: h}
+#       value: !astropy.table.SerializedColumn {name: proj_overhead_time}
+#     proj_science_overhead_time:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id003
+#       value: !astropy.table.SerializedColumn {name: proj_science_overhead_time}
+#     proj_science_time:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id003
+#       value: !astropy.table.SerializedColumn {name: proj_science_time}
+#     proj_total_time:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id003
+#       value: !astropy.table.SerializedColumn {name: proj_total_time}
+#     t_exp:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: &id004 !astropy.units.Unit {unit: s}
+#       value: !astropy.table.SerializedColumn {name: t_exp}
+#     t_exp_eff:
+#       __class__: astropy.units.quantity.Quantity
+#       unit: *id004
+#       value: !astropy.table.SerializedColumn {name: t_exp_eff}
+# schema: astropy-2.0
+array_name alt_mean P n_dets_info net_cmb nefd nep nefd_I nefd_QU dsens_I dsens_QU mapping_speed_I mapping_speed_QU polarized depth_stokes_params depth_rms t_exp t_exp_eff map_area n_passes depth_rms_coadd_desired depth_rms_coadd_actual proj_science_time proj_science_time_per_night proj_n_nights proj_science_overhead_time proj_total_time proj_overhead_time proj_overhead_percent
+a1100 39.75331681439813 12.569314429651586 "1891 / 4012 (47%)" 13.9781134670602 4.6424879059956 210.11663073058668 4.6424879059956 7.029718150411609 6.565469359812049 9.941522747972407 "0.7 deg2 / (h mJy2)" "0.3 deg2 / (h mJy2)" False "Total Intensity (I)" 0.8628785623800943 182.00000000000003 132.00000000000003 0.008943209876543031 1 1.0 0.8628785623800943 0.05055555555555556 1 1 0.013888888888888886 0.15055555555555555 0.11388888888888889 75.6%
+a1400 39.75331681439813 8.989056275194356 "1022 / 2534 (40%)" 5.4955574182285325 2.846909640613641 166.61121425650742 2.846909640613641 4.310829188667889 4.026138224606525 6.096433103687935 "1.6 deg2 / (h mJy2)" "0.7 deg2 / (h mJy2)" False "Total Intensity (I)" 0.5291424226967189 182.00000000000003 132.00000000000003 0.008943209876543031 1 1.0 0.5291424226967189 0.05055555555555556 1 1 0.013888888888888886 0.15055555555555555 0.11388888888888889 75.6%
+a2000 39.75331681439813 6.644531921117617 "640 / 1172 (55%)" 1.6887492619545366 1.5296464188972663 126.47145249950465 1.5296464188972663 2.3162113531296775 2.1632467112399505 3.275617508918528 "7.1 deg2 / (h mJy2)" "3.1 deg2 / (h mJy2)" False "Total Intensity (I)" 0.28430857109683194 182.00000000000003 132.00000000000003 0.008943209876543031 1 1.0 0.28430857109683194 0.05055555555555556 1 1 0.013888888888888886 0.15055555555555555 0.11388888888888889 75.6%
