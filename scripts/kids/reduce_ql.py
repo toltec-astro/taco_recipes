@@ -41,7 +41,7 @@ def _find_file(patterns, search_paths, subpaths=None, unique=True):
     return None
 
 
-def _ensure_find_file(*args, timeout=10, **kwargs):
+def _ensure_find_file(*args, timeout=20, **kwargs):
     wait = 10
     counter = 0
     import time
@@ -60,7 +60,7 @@ def _ensure_find_file(*args, timeout=10, **kwargs):
 
 
 @timeit
-def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=10):
+def _collect_kids_info(entry: SourceInfoModel, search_paths, timeout=20):
     interface = entry.interface
     nw = entry.roach
     obsnum = entry.obsnum
@@ -541,8 +541,8 @@ def _make_kids_plot(
     if output_dir is not None:
         search_paths.append(Path(output_dir))
 
-    overall_timeout = 60
-    per_nw_timeout = 10
+    overall_timeout = 90
+    per_nw_timeout = 60
 
     def _collect(source_info, timeout):
         nonlocal search_paths

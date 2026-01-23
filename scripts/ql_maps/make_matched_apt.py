@@ -453,7 +453,13 @@ def _match_apt_worker(arg):
         mapt = apt_left_nw.copy()
         mapt["det_id_right"] = -1
         return mapt
-    mapt = _make_matched_apt_nw(apt_left_nw, apt_right_nw, debug_plot_kw=debug_plot_kw, match_method=match_method)
+    try:
+        mapt = _make_matched_apt_nw(apt_left_nw, apt_right_nw, debug_plot_kw=debug_plot_kw, match_method=match_method)
+    except Exception:
+        # failed, make mock match
+        mapt = apt_left_nw.copy()
+        mapt["det_id_right"] = -1
+        return mapt
     return mapt
 
 
