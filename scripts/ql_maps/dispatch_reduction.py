@@ -9,6 +9,7 @@ from file_utils_v1 import (
         get_dataset_of_latest_obsnum,
         get_dataset,
         get_obs_goal,
+        get_obs_pgm,
         )
 
 scriptdir = Path(__file__).parent
@@ -80,31 +81,32 @@ if __name__ == "__main__":
         # shell_run(f'./reduce_all_seq.sh {obsnum}')
         # pty.spawn(shlex.split(f'{scriptdir}/reduce_all_seq_new.sh {obsnum}'))
     elif dataset[0]['master_name'] == 'tcs':
-        # cehck the tel obsgola for the obsgaol
+        # check obs_pgm first, then obs_goal
+        obs_pgm = get_obs_pgm(dataset)
         obs_goal = get_obs_goal(dataset)
-        print(f"found {obs_goal=}")
-        if obs_goal is None:
+        print(f"found {obs_pgm=} {obs_goal=}")
+        if obs_pgm == 'On':
+            kidsdir = scriptdir.parent / "kids"
+            print('run noise PSD quicklook')
+            pty.spawn(shlex.split(f'bash {kidsdir}/reduce_noise_ql.sh {obsnum}'))
+        elif obs_goal is None:
             print(f"no runs defined for {obs_goal=}, nothing to do.")
-            # print('run general reduction')
-            # pty.spawn(shlex.split(f'{scriptdir}/reduce_all_seq_new.sh {obsnum}'))
         else:
             # need to get all tune files reduced
             for filepath in dataset['source']:
                 if filepath.endswith('tune.nc'):
                     pass
                     # pty.spawn(shlex.split(f'{scriptdir}/reduce.sh {filepath}'))
-        if obs_goal == 'beammap' or obs_goal == 'azscan' or obs_goal == 'elscan':
-            print('run beammap')
-            pty.spawn(shlex.split(f'bash {scriptdir}/reduce_beammap.sh {obsnum}'))
-        elif obs_goal in ['pointing', 'focus', 'astigmatism', 'm3offset', 'oof']:
-            print('run pointing')
-            pty.spawn(shlex.split(f'{scriptdir}/reduce_pointing.sh {obsnum}'))
-        elif obs_goal == 'science':
-            print('run science')
-            pty.spawn(shlex.split(f'{scriptdir}/reduce_science.sh {obsnum}'))
-        else:
-            print(f'unknown obs goal: {obs_goal}, no action.')
-            # print('run pointing for test')
-            # pty.spawn(shlex.split(f'./reduce_pointing.sh {obsnum}'))
+            if obs_goal == 'beammap' or obs_goal == 'azscan' or obs_goal == 'elscan':
+                print('run beammap')
+                pty.spawn(shlex.split(f'bash {scriptdir}/reduce_beammap.sh {obsnum}'))
+            elif obs_goal in ['pointing', 'focus', 'astigmatism', 'm3offset', 'oof']:
+                print('run pointing')
+                pty.spawn(shlex.split(f'{scriptdir}/reduce_pointing.sh {obsnum}'))
+            elif obs_goal == 'science':
+                print('run science')
+                pty.spawn(shlex.split(f'{scriptdir}/reduce_science.sh {obsnum}'))
+            else:
+                print(f'unknown obs goal: {obs_goal}, no action.')
     else:
         print('unknown data, ignore')

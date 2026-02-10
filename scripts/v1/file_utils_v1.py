@@ -68,6 +68,27 @@ def get_obs_goal(dataset, verbose=False):
         return None
 
 
+def get_obs_pgm(dataset, verbose=False):
+    """Get the ObsPgm (e.g. 'Map', 'On', 'Lissajous') from the tel file.
+
+    In the tel netCDF, this is ``Header.Dcs.ObsPgm``, which the datamodel
+    maps to the meta key ``mapping_type``.
+    """
+    if dataset[0]['master_name'] != 'tcs':
+        return None
+    try:
+        bod_tel = dataset.index_table[dataset['interface'] == 'lmt']["_bod"][0].open()
+        if verbose:
+            print(bod_tel)
+            print(bod_tel.meta)
+        obs_pgm = bod_tel.meta.get('mapping_type', None)
+        return obs_pgm
+    except Exception as e:
+        if verbose:
+            raise
+        return None
+
+
 def get_apt_filename(dataset):
     f = Path(dataset[-1]['source']).resolve()
     stem = f.stem.split("_", 1)[-1]

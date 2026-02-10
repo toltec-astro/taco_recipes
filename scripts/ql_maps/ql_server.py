@@ -160,18 +160,29 @@ def _hstack_images_0(files):
 def _hstack_images(files):
     from PIL import Image
     files = [file for file in files if file.name.endswith('.png')]
-    images = [Image.open(file) for file in files if file.name.endswith('.png')]
+    images = [Image.open(file) for file in files]
 
-    kids_file_index = [i for i, f in enumerate(files) if f.name.endswith("kidsinfo.png")]
-    if not kids_file_index:
+    # Pull out kidsinfo and noise_psd to vstack together
+    kids_idx = [i for i, f in enumerate(files) if 'kidsinfo' in f.name]
+    noise_idx = [i for i, f in enumerate(files) if 'noise_psd' in f.name]
+    vstack_indices = set(kids_idx + noise_idx)
+
+    if not vstack_indices:
         return _hstack_images_impl(images)
-    kids_image = images.pop(kids_file_index[0])
-    if not images:
-        return kids_image
+
+    # Separate vstack group (kids + noise) from the rest
+    vstack_images = [images[i] for i in sorted(vstack_indices)]
+    rest_images = [img for i, img in enumerate(images) if i not in vstack_indices]
+
+    kids_noise_combined = _vstack_images_impl(vstack_images)
+
+    if not rest_images:
+        return kids_noise_combined
+
     images = [
-            kids_image,
-            _hstack_images_impl(images)
-            ] 
+            kids_noise_combined,
+            _hstack_images_impl(rest_images)
+            ]
     return _vstack_images_impl(images)
 
 
@@ -253,13 +264,23 @@ def get_quicklook_data(rootdir, bods, search_paths=None):
     return -1, None, "Unkown type of data product."
 
 
+def _ql_file_sort_key(f):
+    """Sort key for QL files: kidsinfo first, noise_psd second, others last."""
+    name = f.name
+    if 'kidsinfo' in name:
+        return (0, name)
+    if 'noise_psd' in name:
+        return (1, name)
+    return (2, name)
+
+
 def get_kids_ql_data(dp):
     logger = get_logger()
     dpdir = dp.meta['context']['dpdir']
     logger.debug(f'collecting kids ql data for {dp} {dpdir=}')
     quicklook_files = []
     if dpdir is not None:
-        quicklook_files += list(dpdir.glob("ql_*.png"))
+        quicklook_files += sorted(dpdir.glob("ql_*.png"), key=_ql_file_sort_key)
     result = {
             'quicklook_files': quicklook_files,
             }
