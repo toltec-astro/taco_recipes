@@ -76,7 +76,14 @@ if __name__ == "__main__":
 
     # diaptch based on type
     if dataset[0]['master_name'] == 'ics':
-        print(f"no runs defined for ics data, nothing to do.")
+        filesuffix = dataset[0]['filesuffix']
+        if filesuffix == "timestream":
+            print('run noise PSD quicklook')
+            kidsdir = scriptdir.parent / "kids"
+            pty.spawn(shlex.split(f'bash {kidsdir}/reduce_noise_ql.sh {obsnum}'))
+        else:
+            print(f"no runs define for dataset {obsnum}")
+        # print(f"no runs defined for ics data, nothing to do.")
         # print('run {reduce_all.sh}')
         # shell_run(f'./reduce_all_seq.sh {obsnum}')
         # pty.spawn(shlex.split(f'{scriptdir}/reduce_all_seq_new.sh {obsnum}'))

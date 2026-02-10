@@ -3,6 +3,7 @@
 from pathlib import Path
 from tolteca.datamodels.toltec import BasicObsDataset
 from tollan.utils import call_subprocess_with_live_output
+from tollan.utils.log import timeit
 import pty
 import shlex
 
@@ -26,6 +27,7 @@ def get_dataset_of_latest_obsnum(data_lmt_path='/data_lmt'):
     return BasicObsDataset(dataset.index_table[dataset['obsnum'] == obsnum])
 
 
+@timeit
 def get_dataset(data_lmt_path, obsnum):
     links = (
         list(data_lmt_path.glob(f"toltec/tcs/toltec[0-9]*/toltec[0-9]*_{obsnum:06d}_*.nc"))

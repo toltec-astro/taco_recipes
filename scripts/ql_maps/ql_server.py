@@ -8,7 +8,7 @@ import math
 
 from tolteca.datamodels.toltec import BasicObsDataset
 from tolteca.datamodels.toltec.data_prod import ToltecDataProd, DataItemKind, ScienceDataProd
-from tollan.utils.log import get_logger, init_log
+from tollan.utils.log import get_logger, init_log, timeit
 from toltecpipe_status import has_run_for_obsnum, get_client
 
 
@@ -21,6 +21,7 @@ QL_SEARCH_PATHS = [
         ]
 
 
+@timeit
 def collect_from_citlali_index(index_file):
     with open(index_file, 'r') as fo:
         index = yaml.safe_load(fo)
@@ -57,6 +58,7 @@ def collect_from_citlali_index(index_file):
     return ToltecDataProd(source={'data_items': [ScienceDataProd(source=index)], 'meta': {'id': 0}})
 
 
+@timeit
 def get_dp_for_dataset(rootdir, dataset, reduced_dir='toltec/reduced'):
     logger = get_logger()
     reduced_dir = rootdir.joinpath(reduced_dir)
@@ -187,6 +189,7 @@ def _hstack_images(files):
 
 
 
+@timeit
 def get_quicklook_response(ql_files, save_path):
     logger = get_logger()
     logger.debug(f"make summary for ql_files={ql_files}")
@@ -209,6 +212,7 @@ def get_quicklook_response(ql_files, save_path):
             }
 
 
+@timeit
 def get_quicklook_data(rootdir, bods, search_paths=None):
     logger = get_logger()
     if search_paths is None:
@@ -274,6 +278,7 @@ def _ql_file_sort_key(f):
     return (2, name)
 
 
+@timeit
 def get_kids_ql_data(dp):
     logger = get_logger()
     dpdir = dp.meta['context']['dpdir']
@@ -287,6 +292,7 @@ def get_kids_ql_data(dp):
     return result
 
 
+@timeit
 def get_pointing_reader_data(dp):
     logger = get_logger()
     logger.debug(f'collecting pointing reader data for {dp}')
@@ -371,6 +377,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.request.sendall(s)
 
     @classmethod
+    @timeit
     def handle_obsnum(cls, obsnum):
         data_root = Path(DATA_LMT_ROOT)
         dp_root = Path(DATAPROD_ROOT)
