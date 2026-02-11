@@ -9,21 +9,22 @@ ToltecRoachSampleFreqSet ToltecBackend;  ToltecBackend  -RoachArg[0] 122 -RoachC
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 60 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
 PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.016666666666666666 -ElPaddleOff 0.0
 #Sleep -sec  5
-PointingOffsets PointModel;  PointModel  -AzPaddleOff -0.016666666666666666 -ElPaddleOff 0.0
+PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.0
 #Sleep -sec  5
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 60 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
 PointingOffsets PointModel;  PointModel  -AzPaddleOff -0.016666666666666666 -ElPaddleOff 0.0
 #Sleep -sec  5
-PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.016666666666666666 -ElPaddleOff 0.0
+PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.0
 #Sleep -sec  5
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 60 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
 PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.016666666666666666
 #Sleep -sec  5
-PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff -0.016666666666666666
+PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.0
 #Sleep -sec  5
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 60 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
 PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff -0.016666666666666666
 #Sleep -sec  5
-PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.016666666666666666
+PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.0
 #Sleep -sec  5
 Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 60 -ScanRate 50 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2 -YLength 2 -XOmega 5 -YOmega 4 -XDelta 45 -XLengthMinor 0 -YLengthMinor 0 -XDeltaMinor 0
+PointingOffsets PointModel;  PointModel  -AzPaddleOff 0.0 -ElPaddleOff 0.0

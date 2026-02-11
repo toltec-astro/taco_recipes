@@ -1,0 +1,10 @@
+#ObservingScript -Name  "/Applications/OpenWebStart/home/Documents/Work/TolTEC/taco_recipes/observing_scripts/10_ABA_Tests/pointing_0510+180.lmtot" -Author "default" -Date "Tue Oct 21 22:46:35 EDT 2025"
+#Note -Note  LMT
+Dcs Dcs;  Dcs  -Backend null -Receiver null -SubObsMode 0;Shmem  -Backend null -ObsPgmData null -Receiver null
+ProposalInfo Dcs;  Dcs  -ProjectId 2026-Tol-ABA
+ObsGoal Dcs;  Dcs  -ObsGoal Pointing
+Toltec
+ToltecBackend -RoachArg[0]  122 -RoachCmd samplefreq_set -Remote Corba -HostPort clipy:1094 -TcpHostPort clipy:8990
+TelescopeBackend -IncludeSignal  0
+Source Source;  Source  -BaselineList [] -CoordSys Eq -DecProperMotionCor 0 -Dec[0] +18:00:41.581 -Dec[1] +18:00:41.581 -El[0] 0.000000 -El[1] 0.000000 -EphemerisTrackOn 0 -Epoch 2000.0 -GoToZenith 1 -L[0] 0.0 -L[1] 0.0 -LineList [] -Planet None -RaProperMotionCor 0 -Ra[0] 05:10:02.3691 -Ra[1] 05:10:02.3691 -SourceName 0510+180 -VelSys Lsr -Velocity 0.000000 -Vmag 0.0
+Lissajous -ExecMode  0 -RotateWithElevation 0 -TScan 60 -ScanRate 50.0 -TRef 0 -RefPeriod 0 -TCal 0 -CalPeriod 0 -TunePeriod 0 -XLength 2.0 -YLength 2.0 -XOmega 5.0 -YOmega 4.0 -XDelta 45 -XLengthMinor 0.0 -YLengthMinor 0.0 -XDeltaMinor 0.0
