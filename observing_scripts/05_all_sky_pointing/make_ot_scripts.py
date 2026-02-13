@@ -1,3 +1,4 @@
+import json
 from schedule_pointing_run import plan_pointing_run
 from astropy.table import Table
 from astroplan import Observer
@@ -146,6 +147,7 @@ if __name__ == "__main__":
                 "start_time": start_time,
                 "total_time": ctx["total_time"],
                 "n_sources": ctx["n_sources"],
+                "plan": json.dumps(ctx["plan"]),
             })
     summary = Table(summary)
     print(summary)
